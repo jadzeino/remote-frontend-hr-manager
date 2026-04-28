@@ -11,10 +11,15 @@ const Container = styled.label`
   background-color: var(--colors-blank);
   gap: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 
   &:hover {
     border-color: var(--colors-brand);
+  }
+
+  &:has(input:checked) {
+    border-color: var(--colors-brand);
+    background-color: rgba(98, 77, 227, 0.06);
   }
 `;
 
