@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useQuery } from '@tanstack/react-query';
@@ -80,12 +80,13 @@ export const PeoplePage = () => {
   const [searchInput, setSearchInput] = useState(filters.search);
   const debouncedSearch = useDebounce(searchInput, 300);
 
-  // Sync debounced value into URL only when it changes
-  const [lastSynced, setLastSynced] = useState(debouncedSearch);
-  if (debouncedSearch !== lastSynced) {
-    setLastSynced(debouncedSearch);
-    setSearch(debouncedSearch);
-  }
+  // Sync debounced value into URL — only fires after 300ms idle
+  useEffect(() => {
+    if (debouncedSearch !== filters.search) {
+      setSearch(debouncedSearch);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
 
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -115,10 +116,14 @@ export const PeoplePage = () => {
         setSearchInput(f.search);
         setSearch(f.search);
       }
-      if (f.status) {
-        // Clear current status then apply saved ones
-        filters.status.forEach((s) => toggleStatus(s));
-        f.status.forEach((s) => toggleStatus(s));
+      if (f.status !== undefined) {
+        // Apply all statuses at once to avoid sequential URL-state race
+        f.status.forEach((s) => {
+          if (!filters.status.includes(s)) toggleStatus(s);
+        });
+        filters.status.forEach((s) => {
+          if (!f.status!.includes(s)) toggleStatus(s);
+        });
       }
       if (f.country !== undefined) setCountry(f.country ?? '');
       if (f.role !== undefined) setRole(f.role ?? '');
@@ -131,7 +136,7 @@ export const PeoplePage = () => {
     clearAllFilters();
   }, [clearAllFilters]);
 
-  // Apply debounced search to filters for query
+  // Use debounced value for the query (not the URL value which lags by one update)
   const queryFilters = { ...filters, search: debouncedSearch };
 
   return (
