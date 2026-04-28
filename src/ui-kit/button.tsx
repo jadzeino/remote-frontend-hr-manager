@@ -19,6 +19,21 @@ const StyledButton = styled.button`
 
   background: var(--colors-brand);
   color: var(--colors-blank);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: #4f3bc0;
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(98, 77, 227, 0.35);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
 type LabelProps = {
@@ -38,12 +53,8 @@ const StyledLabel = styled.span<LabelProps>`
 `;
 
 const spin = keyframes`
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 `;
 
 const StyledSpinner = styled.span`

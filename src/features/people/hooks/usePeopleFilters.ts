@@ -2,8 +2,7 @@ import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { sanitizeInput } from '../utils/sanitize';
 import { GroupBy, PeopleFiltersState, ViewMode } from '../types';
-
-const DEFAULT_LIMIT = 20;
+import { DEFAULT_LIMIT } from '../constants';
 
 function parseStatus(raw: string | null): string[] {
   if (!raw) return [];

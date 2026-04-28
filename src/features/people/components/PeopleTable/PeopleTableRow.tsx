@@ -16,21 +16,7 @@ const Avatar = styled.img`
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  background-color: var(--colors-gray-200);
-`;
-
-const AvatarFallback = styled.div`
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: var(--colors-brand);
-  color: var(--colors-blank);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  font-weight: 600;
-  flex-shrink: 0;
+  background-color: var(--colors-gray-100);
 `;
 
 const ClickableRow = styled(TableRow)`
@@ -42,19 +28,19 @@ const ClickableRow = styled(TableRow)`
   }
 `;
 
+// Always produce an avatar URL — fall back to DiceBear when photo is null/empty
+function getAvatarUrl(person: Person): string {
+  if (person.photo) return person.photo;
+  const seed = encodeURIComponent(`${person.name}-${person.id}`);
+  return `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${seed}`;
+}
+
 type Props = {
   person: Person;
   onClick: (person: Person) => void;
 };
 
 export const PeopleTableRow = ({ person, onClick }: Props) => {
-  const initials = person.name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-
   const employment =
     person.employment.charAt(0).toUpperCase() + person.employment.slice(1);
 
@@ -70,17 +56,7 @@ export const PeopleTableRow = ({ person, onClick }: Props) => {
     >
       <TableCell>
         <NameCell>
-          {person.photo ? (
-            <Avatar
-              src={person.photo}
-              alt=""
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-          ) : (
-            <AvatarFallback aria-hidden="true">{initials}</AvatarFallback>
-          )}
+          <Avatar src={getAvatarUrl(person)} alt={person.name} />
           {person.name}
         </NameCell>
       </TableCell>
