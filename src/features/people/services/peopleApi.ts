@@ -19,10 +19,9 @@ export function buildQueryParams(query: PeopleQuery): URLSearchParams {
 
   if (query.search) params.set('q', query.search);
 
+  // json-server 0.17 _like uses regex — join multiple statuses with | for OR matching
   if (query.status && query.status.length > 0) {
-    for (const s of query.status) {
-      params.append('status', s);
-    }
+    params.set('status_like', query.status.join('|'));
   }
 
   if (query.country) params.set('country', query.country);

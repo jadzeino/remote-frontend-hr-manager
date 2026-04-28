@@ -33,9 +33,14 @@ describe('buildQueryParams', () => {
     expect(params.get('q')).toBe('john');
   });
 
-  it('appends multiple status values', () => {
+  it('joins multiple status values with | for regex OR', () => {
     const params = buildQueryParams({ status: ['active', 'onboarding'] });
-    expect(params.getAll('status')).toEqual(['active', 'onboarding']);
+    expect(params.get('status_like')).toBe('active|onboarding');
+  });
+
+  it('uses status_like for single status too', () => {
+    const params = buildQueryParams({ status: ['active'] });
+    expect(params.get('status_like')).toBe('active');
   });
 
   it('maps role to employment', () => {
