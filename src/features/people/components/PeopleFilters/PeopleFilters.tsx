@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import styled from 'styled-components';
-import { Checkbox } from '@/ui-kit/checkbox';
 import { Button } from '@/ui-kit/button';
 import { FilterChip } from '@/shared/ui/FilterChip/FilterChip';
 import { useSavedFilters } from '../../hooks/useSavedFilters';
@@ -85,10 +84,6 @@ const SaveInput = styled.input`
   width: 160px;
 `;
 
-const Divider = styled.span`
-  color: var(--colors-gray-300);
-`;
-
 const GroupRow = styled.div`
   display: flex;
   align-items: center;
@@ -148,24 +143,6 @@ export const PeopleFilters = ({
   return (
     <>
       <FiltersRow>
-        <Checkbox
-          label="Active"
-          checked={filters.status.includes('active')}
-          onChange={() => onToggleStatus('active')}
-        />
-        <Checkbox
-          label="Onboarding"
-          checked={filters.status.includes('onboarding')}
-          onChange={() => onToggleStatus('onboarding')}
-        />
-        <Checkbox
-          label="Offboarded"
-          checked={filters.status.includes('offboarded')}
-          onChange={() => onToggleStatus('offboarded')}
-        />
-
-        <Divider>|</Divider>
-
         <Select
           value={filters.country}
           onChange={(e) => onSetCountry(e.target.value)}

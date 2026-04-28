@@ -75,9 +75,3 @@ export async function createPerson(
   return response.json();
 }
 
-export async function fetchCountries(): Promise<string[]> {
-  const response = await fetch(`${BASE_URL}/people?_limit=500`);
-  if (!response.ok) throw new Error('Failed to fetch countries');
-  const data: Person[] = await response.json();
-  return [...new Set(data.map((p) => p.country))].sort();
-}

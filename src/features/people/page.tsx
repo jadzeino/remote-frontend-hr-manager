@@ -1,19 +1,20 @@
 import { useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { ErrorBoundary } from 'react-error-boundary';
-import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/ui-kit/button';
 import { SearchInput } from '@/ui-kit/search-input';
+import { Checkbox } from '@/ui-kit/checkbox';
 import { Text } from '@/ui-kit/text';
 import { usePeopleFilters } from './hooks/usePeopleFilters';
 import { useDebounce } from './hooks/useDebounce';
+import { usePeopleQuery } from './hooks/usePeopleQuery';
 import { PeopleFilters } from './components/PeopleFilters/PeopleFilters';
 import { PeopleTable } from './components/PeopleTable/PeopleTable';
 import { InfiniteScrollTable } from './components/InfiniteScrollTable/InfiniteScrollTable';
 import { ViewToggle } from './components/ViewToggle/ViewToggle';
 import { AddMemberModal } from './components/AddMemberModal/AddMemberModal';
 import { PersonDrawer } from './components/PersonDrawer/PersonDrawer';
-import { fetchCountries } from './services/peopleApi';
+import { COUNTRIES } from './constants';
 import { Person, GroupBy, ViewMode } from './types';
 
 const Container = styled.main`
@@ -37,6 +38,11 @@ const Title = styled.h1`
   color: var(--colors-darkBlue);
 `;
 
+const MemberCount = styled.span`
+  color: var(--colors-gray-500);
+  font-weight: 400;
+`;
+
 const Toolbar = styled.div`
   display: flex;
   align-items: center;
@@ -48,6 +54,12 @@ const SearchWrapper = styled.div`
   flex: 1;
   min-width: 200px;
   max-width: 320px;
+`;
+
+const StatusPills = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;
 
 const ErrorFallback = ({ resetErrorBoundary }: { resetErrorBoundary: () => void }) => (
@@ -76,11 +88,9 @@ export const PeoplePage = () => {
     clearAllFilters,
   } = usePeopleFilters();
 
-  // Local search input state — debounced before hitting the URL/query
   const [searchInput, setSearchInput] = useState(filters.search);
   const debouncedSearch = useDebounce(searchInput, 300);
 
-  // Sync debounced value into URL — only fires after 300ms idle
   useEffect(() => {
     if (debouncedSearch !== filters.search) {
       setSearch(debouncedSearch);
@@ -91,13 +101,10 @@ export const PeoplePage = () => {
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Countries for filter dropdowns — cached for 10 minutes
-  const { data: countries = [] } = useQuery({
-    queryKey: ['countries'],
-    queryFn: fetchCountries,
-    staleTime: 10 * 60_000,
-    gcTime: 30 * 60_000,
-  });
+  // Shared query — same key as PeopleTable so no extra request, just reads the cache
+  const queryFilters = { ...filters, search: debouncedSearch };
+  const { data } = usePeopleQuery(queryFilters);
+  const totalCount = data?.total;
 
   const handleRowClick = useCallback((person: Person) => {
     setSelectedPerson(person);
@@ -117,7 +124,6 @@ export const PeoplePage = () => {
         setSearch(f.search);
       }
       if (f.status !== undefined) {
-        // Apply all statuses at once to avoid sequential URL-state race
         f.status.forEach((s) => {
           if (!filters.status.includes(s)) toggleStatus(s);
         });
@@ -136,16 +142,16 @@ export const PeoplePage = () => {
     clearAllFilters();
   }, [clearAllFilters]);
 
-  // Use debounced value for the query (not the URL value which lags by one update)
-  const queryFilters = { ...filters, search: debouncedSearch };
-
   return (
     <Container>
       <TitleRow>
-        <Title data-testid="page-title">People</Title>
-        <Button onClick={() => setIsAddModalOpen(true)}>
-          + Add member
-        </Button>
+        <Title data-testid="page-title">
+          People{' '}
+          {totalCount !== undefined && (
+            <MemberCount>({totalCount} members)</MemberCount>
+          )}
+        </Title>
+        <Button onClick={() => setIsAddModalOpen(true)}>+ Add member</Button>
       </TitleRow>
 
       <Toolbar>
@@ -154,10 +160,30 @@ export const PeoplePage = () => {
             placeholder="Search people..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
+            onClear={() => setSearchInput('')}
             aria-label="Search people"
             data-testid="search-input"
           />
         </SearchWrapper>
+
+        <StatusPills>
+          <Checkbox
+            label="Active"
+            checked={filters.status.includes('active')}
+            onChange={() => toggleStatus('active')}
+          />
+          <Checkbox
+            label="Onboarding"
+            checked={filters.status.includes('onboarding')}
+            onChange={() => toggleStatus('onboarding')}
+          />
+          <Checkbox
+            label="Offboarded"
+            checked={filters.status.includes('offboarded')}
+            onChange={() => toggleStatus('offboarded')}
+          />
+        </StatusPills>
+
         <ViewToggle
           value={filters.viewMode}
           onChange={(m: ViewMode) => setViewMode(m)}
@@ -166,7 +192,7 @@ export const PeoplePage = () => {
 
       <PeopleFilters
         filters={filters}
-        countries={countries}
+        countries={COUNTRIES}
         onToggleStatus={toggleStatus}
         onSetCountry={setCountry}
         onSetRole={setRole}
@@ -201,7 +227,7 @@ export const PeoplePage = () => {
       <AddMemberModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        countries={countries}
+        countries={COUNTRIES}
       />
     </Container>
   );
