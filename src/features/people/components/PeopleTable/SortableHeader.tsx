@@ -13,11 +13,17 @@ const SortButton = styled.button`
   color: var(--colors-darkBlue);
   padding: 0;
   font-family: inherit;
+  transition: opacity 0.15s ease;
 
   &:focus-visible {
     outline: 2px solid var(--colors-brand);
     outline-offset: 2px;
     border-radius: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
 `;
 
@@ -36,6 +42,7 @@ type Props = {
   currentOrder: Order;
   onSort: (column: string, order: Order) => void;
   $textAlign?: 'left' | 'right' | 'center';
+  disabled?: boolean;
 };
 
 function nextOrder(current: Order): Order {
@@ -57,6 +64,7 @@ export const SortableHeader = ({
   currentOrder,
   onSort,
   $textAlign,
+  disabled,
 }: Props) => {
   const isActive = currentSort === column;
   const activeOrder: Order = isActive ? currentOrder : 'none';
@@ -70,6 +78,7 @@ export const SortableHeader = ({
       <SortButton
         type="button"
         onClick={handleClick}
+        disabled={disabled}
         aria-label={`Sort by ${label}`}
         aria-sort={
           isActive && activeOrder !== 'none'

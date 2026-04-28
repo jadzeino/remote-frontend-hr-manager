@@ -15,9 +15,14 @@ const Chip = styled.button`
   transition: all 0.15s ease;
   white-space: nowrap;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background-color: var(--colors-brand);
     color: var(--colors-blank);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
 
   svg {
@@ -29,14 +34,16 @@ const Chip = styled.button`
 type Props = {
   label: string;
   onRemove: () => void;
+  disabled?: boolean;
 };
 
-export const FilterChip = ({ label, onRemove }: Props) => {
+export const FilterChip = ({ label, onRemove, disabled }: Props) => {
   return (
     <Chip
       type="button"
       onClick={onRemove}
       aria-label={`Remove filter: ${label}`}
+      disabled={disabled}
     >
       {label}
       <span aria-hidden="true">×</span>

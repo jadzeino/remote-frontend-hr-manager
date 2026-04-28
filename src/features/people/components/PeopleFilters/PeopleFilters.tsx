@@ -37,9 +37,15 @@ const Select = styled.select`
   color: var(--colors-gray-700);
   font-size: 1.3rem;
   cursor: pointer;
+  transition: opacity 0.15s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: var(--colors-brand);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
 `;
 
@@ -58,9 +64,15 @@ const ClearButton = styled.button`
   cursor: pointer;
   text-decoration: underline;
   white-space: nowrap;
+  transition: opacity 0.15s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     color: var(--colors-gray-700);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
 `;
 
@@ -76,9 +88,14 @@ const SavedFilterChip = styled.button<{ $active?: boolean }>`
   cursor: pointer;
   transition: all 0.15s;
 
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: var(--colors-brand);
     color: var(--colors-brand);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
 `;
 
@@ -102,6 +119,7 @@ const GROUP_OPTIONS: { value: GroupBy; label: string }[] = [
 type Props = {
   filters: PeopleFiltersState;
   countries: string[];
+  isFetching?: boolean;
   onToggleStatus: (status: string) => void;
   onSetCountry: (country: string) => void;
   onSetRole: (role: string) => void;
@@ -113,6 +131,7 @@ type Props = {
 export const PeopleFilters = ({
   filters,
   countries,
+  isFetching = false,
   onToggleStatus,
   onSetCountry,
   onSetRole,
@@ -145,6 +164,7 @@ export const PeopleFilters = ({
           value={filters.country}
           onChange={(e) => onSetCountry(e.target.value)}
           aria-label="Filter by country"
+          disabled={isFetching}
         >
           <option value="">All countries</option>
           {countries.map((c) => (
@@ -158,6 +178,7 @@ export const PeopleFilters = ({
           value={filters.role}
           onChange={(e) => onSetRole(e.target.value)}
           aria-label="Filter by employment type"
+          disabled={isFetching}
         >
           <option value="">All types</option>
           <option value="employee">Employee</option>
@@ -171,6 +192,7 @@ export const PeopleFilters = ({
           value={filters.groupBy}
           onChange={(e) => onSetGroupBy(e.target.value as GroupBy)}
           aria-label="Group by"
+          disabled={isFetching}
         >
           {GROUP_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
@@ -188,12 +210,13 @@ export const PeopleFilters = ({
                 type="button"
                 onClick={() => onLoadFilter(sf.filters)}
                 title={`Load filter: ${sf.name}`}
+                disabled={isFetching}
               >
                 {sf.name}
                 <span
                   onClick={(e) => {
                     e.stopPropagation();
-                    deleteFilter(sf.id);
+                    if (!isFetching) deleteFilter(sf.id);
                   }}
                   style={{ marginLeft: 6, opacity: 0.6 }}
                   title="Delete saved filter"
@@ -212,14 +235,16 @@ export const PeopleFilters = ({
                   onKeyDown={(e) => e.key === 'Enter' && handleSave()}
                   autoFocus
                   aria-label="Saved filter name"
+                  disabled={isFetching}
                 />
                 <Button
                   onClick={handleSave}
+                  disabled={isFetching}
                   style={{ minHeight: 30, padding: '4px 12px', fontSize: '1.2rem' }}
                 >
                   Save
                 </Button>
-                <ClearButton type="button" onClick={() => setShowSaveInput(false)}>
+                <ClearButton type="button" onClick={() => setShowSaveInput(false)} disabled={isFetching}>
                   Cancel
                 </ClearButton>
               </>
@@ -228,6 +253,7 @@ export const PeopleFilters = ({
                 type="button"
                 onClick={() => setShowSaveInput(true)}
                 title="Save current filters"
+                disabled={isFetching}
               >
                 + Save
               </SavedFilterChip>
@@ -236,7 +262,7 @@ export const PeopleFilters = ({
         )}
 
         {hasActiveFilters && (
-          <ClearButton type="button" onClick={onClearAll}>
+          <ClearButton type="button" onClick={onClearAll} disabled={isFetching}>
             Clear all
           </ClearButton>
         )}
@@ -250,24 +276,28 @@ export const PeopleFilters = ({
               key={s}
               label={s.charAt(0).toUpperCase() + s.slice(1)}
               onRemove={() => onToggleStatus(s)}
+              disabled={isFetching}
             />
           ))}
           {filters.country && (
             <FilterChip
               label={filters.country}
               onRemove={() => onSetCountry('')}
+              disabled={isFetching}
             />
           )}
           {filters.role && (
             <FilterChip
               label={filters.role.charAt(0).toUpperCase() + filters.role.slice(1)}
               onRemove={() => onSetRole('')}
+              disabled={isFetching}
             />
           )}
           {filters.search && (
             <FilterChip
               label={`"${filters.search}"`}
               onRemove={() => onLoadFilter({ ...filters, search: '' })}
+              disabled={isFetching}
             />
           )}
         </ChipsRow>

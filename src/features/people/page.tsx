@@ -6,6 +6,7 @@ import { SearchInput } from '@/ui-kit/search-input';
 import { Text } from '@/ui-kit/text';
 import { usePeopleFilters } from './hooks/usePeopleFilters';
 import { useDebounce } from './hooks/useDebounce';
+import { usePeopleQuery } from './hooks/usePeopleQuery';
 import { PeopleFilters } from './components/PeopleFilters/PeopleFilters';
 import { TableCard } from './components/TableCard/TableCard';
 import { AnalyticsBar } from './components/AnalyticsBar/AnalyticsBar';
@@ -76,9 +77,14 @@ const StatusPill = styled.button<{ $active: boolean; $color: string }>`
   cursor: pointer;
   transition: all 0.15s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: ${({ $color }) => $color};
     color: ${({ $color }) => $color};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;
 
@@ -127,6 +133,9 @@ export const PeoplePage = () => {
 
   const queryFilters = { ...filters, search: debouncedSearch };
 
+  // isFetching shared across all controls — same cache key as PeopleTable so no extra request
+  const { isFetching } = usePeopleQuery(queryFilters);
+
   const handleRowClick = useCallback((person: Person) => setSelectedPerson(person), []);
 
   const handleSort = useCallback(
@@ -166,6 +175,7 @@ export const PeoplePage = () => {
       <AnalyticsBar
         activeStatuses={filters.status}
         onToggleStatus={(s: StatusKey) => toggleStatus(s)}
+        isFetching={isFetching}
       />
 
       {/* Search + status pill toggles */}
@@ -190,6 +200,7 @@ export const PeoplePage = () => {
               $color={color}
               onClick={() => toggleStatus(key)}
               aria-pressed={filters.status.includes(key)}
+              disabled={isFetching}
             >
               {label}
             </StatusPill>
@@ -201,6 +212,7 @@ export const PeoplePage = () => {
       <PeopleFilters
         filters={filters}
         countries={COUNTRIES}
+        isFetching={isFetching}
         onToggleStatus={toggleStatus}
         onSetCountry={setCountry}
         onSetRole={setRole}
@@ -214,6 +226,7 @@ export const PeoplePage = () => {
         <TableCard
           filters={queryFilters}
           viewMode={filters.viewMode}
+          isFetching={isFetching}
           onRowClick={handleRowClick}
           onSort={handleSort}
           onPageChange={setPage}

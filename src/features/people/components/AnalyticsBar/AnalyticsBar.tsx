@@ -56,13 +56,18 @@ const Card = styled.button<{ $active?: boolean; $accent: string }>`
   border-radius: 12px;
   cursor: pointer;
   text-align: left;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
   box-shadow: ${({ $active, $accent }) =>
     $active ? `0 0 0 3px ${$accent}22` : '0 1px 3px rgba(0,0,0,0.06)'};
 
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: ${({ $accent }) => $accent};
     box-shadow: 0 0 0 3px ${({ $accent }) => $accent}22;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;
 
@@ -127,6 +132,7 @@ type StatStatus = 'active' | 'onboarding' | 'offboarded';
 type Props = {
   activeStatuses: string[];
   onToggleStatus: (s: StatStatus) => void;
+  isFetching?: boolean;
 };
 
 const CARDS = [
@@ -160,7 +166,7 @@ const CARDS = [
   },
 ] as const;
 
-export const AnalyticsBar = ({ activeStatuses, onToggleStatus }: Props) => {
+export const AnalyticsBar = ({ activeStatuses, onToggleStatus, isFetching = false }: Props) => {
   const [open, setOpen] = useState(true);
   const { stats, isLoading } = useAnalyticsStats();
 
@@ -201,6 +207,7 @@ export const AnalyticsBar = ({ activeStatuses, onToggleStatus }: Props) => {
                   onClick={() => card.key && onToggleStatus(card.key)}
                   aria-pressed={isActive}
                   title={card.key ? `Filter by ${card.label}` : undefined}
+                  disabled={isFetching && card.key !== null}
                   style={card.key === null ? { cursor: 'default' } : undefined}
                 >
                   <IconCircle $bg={card.bg}>{card.icon}</IconCircle>

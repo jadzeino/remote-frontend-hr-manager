@@ -122,12 +122,12 @@ export const PeopleTable = ({ filters, onRowClick, onSort, onDataReady }: Props)
         <Table role="grid" aria-label="People list" aria-busy={isFetching}>
           <thead>
             <tr>
-              <SortableHeader column="name" label="Name" currentSort={filters.sortBy} currentOrder={filters.order} onSort={onSort} />
-              <SortableHeader column="jobTitle" label="Role" currentSort={filters.sortBy} currentOrder={filters.order} onSort={onSort} />
+              <SortableHeader column="name" label="Name" currentSort={filters.sortBy} currentOrder={filters.order} onSort={onSort} disabled={isFetching} />
+              <SortableHeader column="jobTitle" label="Role" currentSort={filters.sortBy} currentOrder={filters.order} onSort={onSort} disabled={isFetching} />
               <TableThCell>Type</TableThCell>
               <TableThCell>Status</TableThCell>
-              <SortableHeader column="country" label="Country" currentSort={filters.sortBy} currentOrder={filters.order} onSort={onSort} />
-              <SortableHeader column="salary" label="Salary" currentSort={filters.sortBy} currentOrder={filters.order} onSort={onSort} $textAlign="right" />
+              <SortableHeader column="country" label="Country" currentSort={filters.sortBy} currentOrder={filters.order} onSort={onSort} disabled={isFetching} />
+              <SortableHeader column="salary" label="Salary" currentSort={filters.sortBy} currentOrder={filters.order} onSort={onSort} $textAlign="right" disabled={isFetching} />
             </tr>
           </thead>
 

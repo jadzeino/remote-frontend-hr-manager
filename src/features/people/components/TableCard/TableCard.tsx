@@ -67,8 +67,13 @@ const ViewToggleBtn = styled.button<{ $active: boolean }>`
   background: ${({ $active }) => ($active ? 'var(--colors-brand)' : 'var(--colors-blank)')};
   color: ${({ $active }) => ($active ? 'var(--colors-blank)' : 'var(--colors-gray-600)')};
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: ${({ $active }) => ($active ? 'var(--colors-brand)' : 'var(--colors-gray-100)')};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;
 
@@ -83,9 +88,10 @@ const NavBtn = styled.button`
   background: var(--colors-blank);
   color: var(--colors-gray);
   cursor: pointer;
+  transition: opacity 0.15s ease;
 
-  &:hover { border-color: var(--colors-gray); }
-  &:disabled { opacity: 0.4; cursor: default; }
+  &:hover:not(:disabled) { border-color: var(--colors-gray); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
 
   svg { width: 14px; height: 14px; }
 `;
@@ -100,10 +106,13 @@ const PageSelect = styled.select`
   font-size: 1.2rem;
   cursor: pointer;
   appearance: none;
+  transition: opacity 0.15s ease;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' fill='%23617798'%3E%3Cpath clip-rule='evenodd' d='M14.78 5.47c.3.3.3.77 0 1.06L9.31 12l5.47 5.47a.75.75 0 1 1-1.06 1.06l-6-6a.75.75 0 0 1 0-1.06l6-6c.3-.3.77-.3 1.06 0z' fill-rule='evenodd' transform='rotate(-90 12 12)'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 4px center;
   background-size: 14px;
+
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
 `;
 
 const RowsSelect = styled(PageSelect)`
@@ -113,6 +122,7 @@ const RowsSelect = styled(PageSelect)`
 type Props = {
   filters: PeopleFiltersState;
   viewMode: ViewMode;
+  isFetching?: boolean;
   onRowClick: (p: Person) => void;
   onSort: (col: string, order: 'asc' | 'desc' | 'none') => void;
   onPageChange: (page: number) => void;
@@ -123,6 +133,7 @@ type Props = {
 export const TableCard = ({
   filters,
   viewMode,
+  isFetching = false,
   onRowClick,
   onSort,
   onPageChange,
@@ -177,6 +188,7 @@ export const TableCard = ({
               $active={viewMode === 'pagination'}
               onClick={() => onViewModeChange('pagination')}
               aria-pressed={viewMode === 'pagination'}
+              disabled={isFetching}
             >
               Pagination
             </ViewToggleBtn>
@@ -185,6 +197,7 @@ export const TableCard = ({
               $active={viewMode === 'infinite'}
               onClick={() => onViewModeChange('infinite')}
               aria-pressed={viewMode === 'infinite'}
+              disabled={isFetching}
             >
               Infinite scroll
             </ViewToggleBtn>
@@ -192,25 +205,26 @@ export const TableCard = ({
 
           {viewMode === 'pagination' && total > 0 && (
             <>
-              <NavBtn onClick={() => onPageChange(1)} disabled={filters.page === 1} aria-label="First page">
+              <NavBtn onClick={() => onPageChange(1)} disabled={isFetching || filters.page === 1} aria-label="First page">
                 <ChevronsLeft />
               </NavBtn>
-              <NavBtn onClick={() => onPageChange(filters.page - 1)} disabled={filters.page === 1} aria-label="Previous page">
+              <NavBtn onClick={() => onPageChange(filters.page - 1)} disabled={isFetching || filters.page === 1} aria-label="Previous page">
                 <ChevronLeft />
               </NavBtn>
               <PageSelect
                 value={filters.page}
                 onChange={(e) => onPageChange(Number(e.target.value))}
                 aria-label="Page"
+                disabled={isFetching}
               >
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                   <option key={p} value={p}>{p}</option>
                 ))}
               </PageSelect>
-              <NavBtn onClick={() => onPageChange(filters.page + 1)} disabled={filters.page >= totalPages} aria-label="Next page">
+              <NavBtn onClick={() => onPageChange(filters.page + 1)} disabled={isFetching || filters.page >= totalPages} aria-label="Next page">
                 <ChevronRight />
               </NavBtn>
-              <NavBtn onClick={() => onPageChange(totalPages)} disabled={filters.page >= totalPages} aria-label="Last page">
+              <NavBtn onClick={() => onPageChange(totalPages)} disabled={isFetching || filters.page >= totalPages} aria-label="Last page">
                 <ChevronsRight />
               </NavBtn>
             </>
@@ -223,6 +237,7 @@ export const TableCard = ({
             value={filters.limit}
             onChange={(e) => onLimitChange(Number(e.target.value))}
             aria-label="Rows per page"
+            disabled={isFetching}
           >
             <option value={10}>Rows 10</option>
             <option value={25}>Rows 25</option>
