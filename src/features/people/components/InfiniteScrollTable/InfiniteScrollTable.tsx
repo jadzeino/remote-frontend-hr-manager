@@ -13,6 +13,9 @@ import { Person, PeopleFiltersState } from '../../types';
 
 const TableWrapper = styled.div`
   overflow-x: auto;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 `;
 
 const TriggerRow = styled.div`
