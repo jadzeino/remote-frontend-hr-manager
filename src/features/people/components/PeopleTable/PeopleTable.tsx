@@ -10,8 +10,10 @@ import { PeopleTableRow } from './PeopleTableRow';
 import { SortableHeader } from './SortableHeader';
 import { Person, PeopleFiltersState } from '../../types';
 
-const TableWrapper = styled.div`
+const TableWrapper = styled.div<{ $isFetching?: boolean }>`
   overflow-x: auto;
+  transition: opacity 0.15s ease;
+  ${({ $isFetching }) => $isFetching && 'opacity: 0.55;'}
 `;
 
 const EmptyState = styled.div`
@@ -79,7 +81,7 @@ export const PeopleTable = ({
 
   return (
     <>
-      <TableWrapper>
+      <TableWrapper $isFetching={isFetching && !isLoading}>
         <Table role="grid" aria-label="People list" aria-busy={isFetching}>
           <thead>
             <tr>
