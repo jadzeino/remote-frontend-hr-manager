@@ -33,6 +33,14 @@ describe('groupPeople', () => {
     expect(employees?.people).toHaveLength(2);
   });
 
+  it('groups by jobTitle', () => {
+    const groups = groupPeople(people, 'jobTitle');
+    expect(groups).toHaveLength(3);
+    const devGroup = groups.find((g) => g.key === 'Dev');
+    expect(devGroup?.people).toHaveLength(1);
+    expect(devGroup?.label).toBe('Dev');
+  });
+
   it('sorts group keys alphabetically', () => {
     const groups = groupPeople(people, 'country');
     expect(groups[0].key).toBe('Germany');

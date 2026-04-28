@@ -96,10 +96,11 @@ const Label = styled.span`
 `;
 
 const GROUP_OPTIONS: { value: GroupBy; label: string }[] = [
-  { value: 'none', label: 'No grouping' },
-  { value: 'country', label: 'Country' },
-  { value: 'status', label: 'Status' },
-  { value: 'role', label: 'Role' },
+  { value: 'none',     label: 'No grouping' },
+  { value: 'country',  label: 'Country' },
+  { value: 'status',   label: 'Status' },
+  { value: 'role',     label: 'Employment Type' },
+  { value: 'jobTitle', label: 'Job Title' },
 ];
 
 type Props = {

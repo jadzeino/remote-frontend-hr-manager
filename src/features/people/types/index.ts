@@ -20,7 +20,7 @@ export type PeopleResponse = {
   totalPages: number;
 };
 
-export type GroupBy = 'none' | 'country' | 'status' | 'role';
+export type GroupBy = 'none' | 'country' | 'status' | 'role' | 'jobTitle';
 export type ViewMode = 'pagination' | 'infinite';
 
 export type SortState = {

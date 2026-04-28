@@ -14,6 +14,8 @@ function getGroupKey(person: Person, groupBy: GroupBy): string {
       return person.status;
     case 'role':
       return person.employment;
+    case 'jobTitle':
+      return person.jobTitle;
     default:
       return '';
   }
