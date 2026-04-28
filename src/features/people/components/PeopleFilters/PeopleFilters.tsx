@@ -5,11 +5,20 @@ import { FilterChip } from '@/shared/ui/FilterChip/FilterChip';
 import { useSavedFilters } from '../../hooks/useSavedFilters';
 import { PeopleFiltersState, GroupBy } from '../../types';
 
-const FiltersRow = styled.div`
+// Single compact row: [Country] [Type] | Group:[select] | [saved chips] [+Save] [Clear all]
+const ControlsBar = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+`;
+
+const ControlsDivider = styled.span`
+  width: 1px;
+  height: 20px;
+  background: var(--colors-gray-200);
+  align-self: center;
+  flex-shrink: 0;
 `;
 
 const ChipsRow = styled.div`
@@ -17,20 +26,11 @@ const ChipsRow = styled.div`
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
-  min-height: 28px;
-`;
-
-const SavedRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding-top: 4px;
 `;
 
 const Select = styled.select`
-  height: 36px;
-  padding: 0 10px;
+  height: 34px;
+  padding: 0 8px;
   border: 1px solid var(--colors-gray-400);
   border-radius: 8px;
   background: var(--colors-blank);
@@ -43,6 +43,12 @@ const Select = styled.select`
   }
 `;
 
+const InlineLabel = styled.span`
+  font-size: 1.3rem;
+  color: var(--colors-gray-500);
+  white-space: nowrap;
+`;
+
 const ClearButton = styled.button`
   padding: 4px 10px;
   border: none;
@@ -51,6 +57,7 @@ const ClearButton = styled.button`
   font-size: 1.2rem;
   cursor: pointer;
   text-decoration: underline;
+  white-space: nowrap;
 
   &:hover {
     color: var(--colors-gray-700);
@@ -58,7 +65,7 @@ const ClearButton = styled.button`
 `;
 
 const SavedFilterChip = styled.button<{ $active?: boolean }>`
-  padding: 4px 10px;
+  padding: 3px 10px;
   border: 1px solid ${({ $active }) =>
     $active ? 'var(--colors-brand)' : 'var(--colors-gray-300)'};
   border-radius: 16px;
@@ -81,18 +88,7 @@ const SaveInput = styled.input`
   border: 1px solid var(--colors-gray-400);
   border-radius: 6px;
   font-size: 1.3rem;
-  width: 160px;
-`;
-
-const GroupRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const Label = styled.span`
-  font-size: 1.3rem;
-  color: var(--colors-gray-500);
+  width: 140px;
 `;
 
 const GROUP_OPTIONS: { value: GroupBy; label: string }[] = [
@@ -143,7 +139,8 @@ export const PeopleFilters = ({
 
   return (
     <>
-      <FiltersRow>
+      {/* Single compact controls row */}
+      <ControlsBar>
         <Select
           value={filters.country}
           onChange={(e) => onSetCountry(e.target.value)}
@@ -166,8 +163,86 @@ export const PeopleFilters = ({
           <option value="employee">Employee</option>
           <option value="contractor">Contractor</option>
         </Select>
-      </FiltersRow>
 
+        <ControlsDivider />
+
+        <InlineLabel>Group:</InlineLabel>
+        <Select
+          value={filters.groupBy}
+          onChange={(e) => onSetGroupBy(e.target.value as GroupBy)}
+          aria-label="Group by"
+        >
+          {GROUP_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </Select>
+
+        {(savedFilters.length > 0 || true) && (
+          <>
+            <ControlsDivider />
+            {savedFilters.map((sf) => (
+              <SavedFilterChip
+                key={sf.id}
+                type="button"
+                onClick={() => onLoadFilter(sf.filters)}
+                title={`Load filter: ${sf.name}`}
+              >
+                {sf.name}
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteFilter(sf.id);
+                  }}
+                  style={{ marginLeft: 6, opacity: 0.6 }}
+                  title="Delete saved filter"
+                >
+                  ×
+                </span>
+              </SavedFilterChip>
+            ))}
+
+            {showSaveInput ? (
+              <>
+                <SaveInput
+                  value={saveName}
+                  onChange={(e) => setSaveName(e.target.value)}
+                  placeholder="Filter name..."
+                  onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+                  autoFocus
+                  aria-label="Saved filter name"
+                />
+                <Button
+                  onClick={handleSave}
+                  style={{ minHeight: 30, padding: '4px 12px', fontSize: '1.2rem' }}
+                >
+                  Save
+                </Button>
+                <ClearButton type="button" onClick={() => setShowSaveInput(false)}>
+                  Cancel
+                </ClearButton>
+              </>
+            ) : (
+              <SavedFilterChip
+                type="button"
+                onClick={() => setShowSaveInput(true)}
+                title="Save current filters"
+              >
+                + Save
+              </SavedFilterChip>
+            )}
+          </>
+        )}
+
+        {hasActiveFilters && (
+          <ClearButton type="button" onClick={onClearAll}>
+            Clear all
+          </ClearButton>
+        )}
+      </ControlsBar>
+
+      {/* Active filter chips — only when filters are applied */}
       {hasActiveFilters && (
         <ChipsRow>
           {filters.status.map((s) => (
@@ -192,83 +267,11 @@ export const PeopleFilters = ({
           {filters.search && (
             <FilterChip
               label={`"${filters.search}"`}
-              onRemove={() => onLoadFilter({ ...filters })}
+              onRemove={() => onLoadFilter({ ...filters, search: '' })}
             />
           )}
-          <ClearButton type="button" onClick={onClearAll}>
-            Clear all
-          </ClearButton>
         </ChipsRow>
       )}
-
-      <GroupRow>
-        <Label>Group by:</Label>
-        <Select
-          value={filters.groupBy}
-          onChange={(e) => onSetGroupBy(e.target.value as GroupBy)}
-          aria-label="Group by"
-        >
-          {GROUP_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </Select>
-      </GroupRow>
-
-      <SavedRow>
-        <Label>Saved:</Label>
-        {savedFilters.map((sf) => (
-          <SavedFilterChip
-            key={sf.id}
-            type="button"
-            onClick={() => onLoadFilter(sf.filters)}
-            title={`Load filter: ${sf.name}`}
-          >
-            {sf.name}
-            <span
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteFilter(sf.id);
-              }}
-              style={{ marginLeft: 6, opacity: 0.6 }}
-              title="Delete saved filter"
-            >
-              ×
-            </span>
-          </SavedFilterChip>
-        ))}
-
-        {showSaveInput ? (
-          <>
-            <SaveInput
-              value={saveName}
-              onChange={(e) => setSaveName(e.target.value)}
-              placeholder="Filter name..."
-              onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-              autoFocus
-              aria-label="Saved filter name"
-            />
-            <Button
-              onClick={handleSave}
-              style={{ minHeight: 30, padding: '4px 12px', fontSize: '1.2rem' }}
-            >
-              Save
-            </Button>
-            <ClearButton type="button" onClick={() => setShowSaveInput(false)}>
-              Cancel
-            </ClearButton>
-          </>
-        ) : (
-          <SavedFilterChip
-            type="button"
-            onClick={() => setShowSaveInput(true)}
-            title="Save current filters"
-          >
-            + Save current
-          </SavedFilterChip>
-        )}
-      </SavedRow>
     </>
   );
 };
