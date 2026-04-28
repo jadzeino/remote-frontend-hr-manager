@@ -2,7 +2,7 @@ import { ComponentPropsWithoutRef, ReactElement } from 'react';
 import styled, { css, keyframes } from 'styled-components';
 import { SROnly } from './sr-only';
 
-const StyledButton = styled.button`
+const StyledButton = styled.button<{ $variant?: 'primary' | 'secondary' }>`
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -14,16 +14,28 @@ const StyledButton = styled.button`
   line-height: 1;
   min-height: 44px;
   padding: 12px 24px;
-  border: none;
   border-radius: 24px;
+  transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 
-  background: var(--colors-brand);
-  color: var(--colors-blank);
-  transition: background 0.15s ease, box-shadow 0.15s ease;
-
-  &:hover:not(:disabled) {
-    background: #4f3bc0;
-  }
+  ${({ $variant }) =>
+    $variant === 'secondary'
+      ? css`
+          border: 1.5px solid var(--colors-gray-300);
+          background: var(--colors-blank);
+          color: var(--colors-gray-700);
+          &:hover:not(:disabled) {
+            border-color: var(--colors-gray);
+            background: var(--colors-gray-100);
+          }
+        `
+      : css`
+          border: none;
+          background: var(--colors-brand);
+          color: var(--colors-blank);
+          &:hover:not(:disabled) {
+            background: #4f3bc0;
+          }
+        `}
 
   &:focus-visible {
     outline: 3px solid rgba(98, 77, 227, 0.35);
@@ -73,13 +85,13 @@ const StyledSpinner = styled.span`
   animation: ${spin} 0.45s linear infinite;
 `;
 
-type Props = ComponentPropsWithoutRef<'button'> & LabelProps;
+type Props = ComponentPropsWithoutRef<'button'> & LabelProps & { variant?: 'primary' | 'secondary' };
 
 export const Button = (props: Props): ReactElement => {
-  const { $isLoading, children, ...rest } = props;
+  const { $isLoading, variant, children, ...rest } = props;
 
   return (
-    <StyledButton type="button" {...rest}>
+    <StyledButton type="button" $variant={variant} {...rest}>
       <StyledLabel $isLoading={$isLoading}>{children}</StyledLabel>
       {$isLoading && (
         <>

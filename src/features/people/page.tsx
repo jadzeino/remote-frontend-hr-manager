@@ -14,6 +14,8 @@ import { AddMemberModal } from './components/AddMemberModal/AddMemberModal';
 import { PersonDrawer } from './components/PersonDrawer/PersonDrawer';
 import { COUNTRIES } from './constants';
 import { Person, GroupBy, ViewMode } from './types';
+import { exportAllPeople } from './services/peopleApi';
+import { downloadCsv } from './utils/exportCsv';
 
 const Container = styled.main`
   max-width: var(--layout-width);
@@ -130,6 +132,25 @@ export const PeoplePage = () => {
 
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = useCallback(async () => {
+    setIsExporting(true);
+    try {
+      const people = await exportAllPeople({
+        search: debouncedSearch,
+        status: filters.status,
+        country: filters.country,
+        role: filters.role,
+        sortBy: filters.sortBy || undefined,
+        order: filters.order !== 'none' ? filters.order : undefined,
+      });
+      const timestamp = new Date().toISOString().slice(0, 10);
+      downloadCsv(people, `people-${timestamp}.csv`);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [debouncedSearch, filters.status, filters.country, filters.role, filters.sortBy, filters.order]);
 
   const queryFilters = { ...filters, search: debouncedSearch };
 
@@ -168,7 +189,16 @@ export const PeoplePage = () => {
           <Title data-testid="page-title">People</Title>
           <Subtitle>Manage your team members, contracts, and onboarding.</Subtitle>
         </TitleBlock>
-        <Button onClick={() => setIsAddModalOpen(true)}>+ Add member</Button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button
+            variant="secondary"
+            onClick={handleExport}
+            disabled={isFetching || isExporting}
+          >
+            {isExporting ? 'Exporting…' : 'Export CSV'}
+          </Button>
+          <Button onClick={() => setIsAddModalOpen(true)}>+ Add member</Button>
+        </div>
       </TitleRow>
 
       {/* Collapsible analytics cards — clicking Active/Onboarding/Offboarded filters the table */}

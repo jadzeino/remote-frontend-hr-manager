@@ -67,6 +67,15 @@ export async function fetchStatusCount(status: string | null): Promise<number> {
   return parseInt(res.headers.get('X-Total-Count') ?? '0', 10);
 }
 
+export async function exportAllPeople(query: Omit<PeopleQuery, 'page' | 'limit'>): Promise<Person[]> {
+  const params = buildQueryParams({ ...query, page: 1, limit: 10000 });
+  params.delete('_page');
+  params.set('_limit', '10000');
+  const response = await fetch(`${BASE_URL}/people?${params.toString()}`);
+  if (!response.ok) throw new Error(`Export failed: ${response.status}`);
+  return response.json();
+}
+
 export async function createPerson(
   person: Omit<Person, 'id'>
 ): Promise<Person> {
