@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Table, TableCell, TableRow, TableThCell } from '@/ui-kit/table';
 import { Pagination } from '@/ui-kit/pagination';
 import { Text } from '@/ui-kit/text';
@@ -30,7 +31,13 @@ const ErrorState = styled.div`
   gap: 16px;
 `;
 
-const GroupHeader = styled.tr`
+const GroupHeader = styled.tr<{ $clickable?: boolean }>`
+  ${({ $clickable }) => $clickable && 'cursor: pointer;'}
+
+  &:hover td {
+    ${({ $clickable }) => $clickable && 'background-color: var(--colors-gray-100);'}
+  }
+
   td {
     background-color: var(--colors-gray-50);
     padding: 8px 16px;
@@ -40,7 +47,22 @@ const GroupHeader = styled.tr`
     letter-spacing: 0.05em;
     text-transform: uppercase;
     border-top: 2px solid var(--colors-gray-200);
+    user-select: none;
   }
+`;
+
+const GroupHeaderContent = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+const Chevron = styled.span<{ $collapsed: boolean }>`
+  display: inline-block;
+  transition: transform 0.2s ease;
+  transform: rotate(${({ $collapsed }) => ($collapsed ? '-90deg' : '0deg')});
+  font-style: normal;
+  line-height: 1;
 `;
 
 type Props = {
@@ -64,7 +86,27 @@ export const PeopleTable = ({
   const people = data?.data ?? [];
   const groups = useGroupedPeople(people, filters.groupBy);
 
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+
+  // Reset collapsed state when groupBy changes
+  useEffect(() => {
+    setCollapsed(new Set());
+  }, [filters.groupBy]);
+
+  const toggleGroup = (key: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
   const showSkeleton = isLoading || (isFetching && !data);
+  const isGrouped = filters.groupBy !== 'none';
 
   if (isError) {
     return (
@@ -141,24 +183,35 @@ export const PeopleTable = ({
 
           {!showSkeleton &&
             !isEmpty &&
-            groups.map((group) => (
-              <tbody key={group.key}>
-                {filters.groupBy !== 'none' && (
-                  <GroupHeader>
-                    <td colSpan={6}>
-                      {group.label} ({group.people.length})
-                    </td>
-                  </GroupHeader>
-                )}
-                {group.people.map((person) => (
-                  <PeopleTableRow
-                    key={person.id}
-                    person={person}
-                    onClick={onRowClick}
-                  />
-                ))}
-              </tbody>
-            ))}
+            groups.map((group) => {
+              const isCollapsed = collapsed.has(group.key);
+              return (
+                <tbody key={group.key}>
+                  {isGrouped && (
+                    <GroupHeader
+                      $clickable
+                      onClick={() => toggleGroup(group.key)}
+                      aria-expanded={!isCollapsed}
+                    >
+                      <td colSpan={6}>
+                        <GroupHeaderContent>
+                          <Chevron $collapsed={isCollapsed}>▼</Chevron>
+                          {group.label} ({group.people.length})
+                        </GroupHeaderContent>
+                      </td>
+                    </GroupHeader>
+                  )}
+                  {!isCollapsed &&
+                    group.people.map((person) => (
+                      <PeopleTableRow
+                        key={person.id}
+                        person={person}
+                        onClick={onRowClick}
+                      />
+                    ))}
+                </tbody>
+              );
+            })}
         </Table>
       </TableWrapper>
 
