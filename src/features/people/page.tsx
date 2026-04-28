@@ -3,15 +3,12 @@ import styled from 'styled-components';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Button } from '@/ui-kit/button';
 import { SearchInput } from '@/ui-kit/search-input';
-import { Checkbox } from '@/ui-kit/checkbox';
 import { Text } from '@/ui-kit/text';
 import { usePeopleFilters } from './hooks/usePeopleFilters';
 import { useDebounce } from './hooks/useDebounce';
-import { usePeopleQuery } from './hooks/usePeopleQuery';
 import { PeopleFilters } from './components/PeopleFilters/PeopleFilters';
-import { PeopleTable } from './components/PeopleTable/PeopleTable';
-import { InfiniteScrollTable } from './components/InfiniteScrollTable/InfiniteScrollTable';
-import { ViewToggle } from './components/ViewToggle/ViewToggle';
+import { TableCard } from './components/TableCard/TableCard';
+import { AnalyticsBar } from './components/AnalyticsBar/AnalyticsBar';
 import { AddMemberModal } from './components/AddMemberModal/AddMemberModal';
 import { PersonDrawer } from './components/PersonDrawer/PersonDrawer';
 import { COUNTRIES } from './constants';
@@ -23,14 +20,20 @@ const Container = styled.main`
   padding: 32px 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 `;
 
 const TitleRow = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+`;
+
+const TitleBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 `;
 
 const Title = styled.h1`
@@ -38,40 +41,61 @@ const Title = styled.h1`
   color: var(--colors-darkBlue);
 `;
 
-const MemberCount = styled.span`
+const Subtitle = styled.p`
+  font-size: 1.3rem;
   color: var(--colors-gray-500);
-  font-weight: 400;
 `;
 
 const Toolbar = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 `;
 
 const SearchWrapper = styled.div`
   flex: 1;
-  min-width: 200px;
-  max-width: 320px;
+  min-width: 220px;
+  max-width: 340px;
 `;
 
-const StatusPills = styled.div`
+const StatusPillGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+`;
+
+const StatusPill = styled.button<{ $active: boolean; $color: string }>`
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid ${({ $active, $color }) => ($active ? $color : 'var(--colors-gray-300)')};
+  background: ${({ $active, $color }) => ($active ? $color + '18' : 'var(--colors-blank)')};
+  color: ${({ $active, $color }) => ($active ? $color : 'var(--colors-gray-600)')};
+  font-size: 1.3rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: ${({ $color }) => $color};
+    color: ${({ $color }) => $color};
+  }
 `;
 
 const ErrorFallback = ({ resetErrorBoundary }: { resetErrorBoundary: () => void }) => (
   <div style={{ padding: 48, textAlign: 'center' }}>
-    <Text $variant="bodyM" $color="gray-700">
-      Something went wrong loading the people list.
-    </Text>
-    <Button onClick={resetErrorBoundary} style={{ marginTop: 16 }}>
-      Try again
-    </Button>
+    <Text $variant="bodyM" $color="gray-700">Something went wrong loading the people list.</Text>
+    <Button onClick={resetErrorBoundary} style={{ marginTop: 16 }}>Try again</Button>
   </div>
 );
+
+const STATUS_PILLS = [
+  { key: 'active',      label: 'Active',      color: '#16a34a' },
+  { key: 'onboarding',  label: 'Onboarding',  color: '#2563eb' },
+  { key: 'offboarded',  label: 'Offboarded',  color: '#9ca3af' },
+] as const;
+
+type StatusKey = 'active' | 'onboarding' | 'offboarded';
 
 export const PeoplePage = () => {
   const {
@@ -101,35 +125,21 @@ export const PeoplePage = () => {
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Shared query — same key as PeopleTable so no extra request, just reads the cache
   const queryFilters = { ...filters, search: debouncedSearch };
-  const { data } = usePeopleQuery(queryFilters);
-  const totalCount = data?.total;
 
-  const handleRowClick = useCallback((person: Person) => {
-    setSelectedPerson(person);
-  }, []);
+  const handleRowClick = useCallback((person: Person) => setSelectedPerson(person), []);
 
   const handleSort = useCallback(
-    (column: string, order: 'asc' | 'desc' | 'none') => {
-      setSortBy(column, order);
-    },
+    (column: string, order: 'asc' | 'desc' | 'none') => setSortBy(column, order),
     [setSortBy]
   );
 
   const handleLoadFilter = useCallback(
     (f: { search?: string; status?: string[]; country?: string; role?: string }) => {
-      if (f.search !== undefined) {
-        setSearchInput(f.search);
-        setSearch(f.search);
-      }
+      if (f.search !== undefined) { setSearchInput(f.search); setSearch(f.search); }
       if (f.status !== undefined) {
-        f.status.forEach((s) => {
-          if (!filters.status.includes(s)) toggleStatus(s);
-        });
-        filters.status.forEach((s) => {
-          if (!f.status!.includes(s)) toggleStatus(s);
-        });
+        f.status.forEach((s) => { if (!filters.status.includes(s)) toggleStatus(s); });
+        filters.status.forEach((s) => { if (!f.status!.includes(s)) toggleStatus(s); });
       }
       if (f.country !== undefined) setCountry(f.country ?? '');
       if (f.role !== undefined) setRole(f.role ?? '');
@@ -145,15 +155,20 @@ export const PeoplePage = () => {
   return (
     <Container>
       <TitleRow>
-        <Title data-testid="page-title">
-          People{' '}
-          {totalCount !== undefined && (
-            <MemberCount>({totalCount} members)</MemberCount>
-          )}
-        </Title>
+        <TitleBlock>
+          <Title data-testid="page-title">People</Title>
+          <Subtitle>Manage your team members, contracts, and onboarding.</Subtitle>
+        </TitleBlock>
         <Button onClick={() => setIsAddModalOpen(true)}>+ Add member</Button>
       </TitleRow>
 
+      {/* Collapsible analytics cards — clicking Active/Onboarding/Offboarded filters the table */}
+      <AnalyticsBar
+        activeStatuses={filters.status}
+        onToggleStatus={(s: StatusKey) => toggleStatus(s)}
+      />
+
+      {/* Search + status pill toggles */}
       <Toolbar>
         <SearchWrapper>
           <SearchInput
@@ -166,30 +181,23 @@ export const PeoplePage = () => {
           />
         </SearchWrapper>
 
-        <StatusPills>
-          <Checkbox
-            label="Active"
-            checked={filters.status.includes('active')}
-            onChange={() => toggleStatus('active')}
-          />
-          <Checkbox
-            label="Onboarding"
-            checked={filters.status.includes('onboarding')}
-            onChange={() => toggleStatus('onboarding')}
-          />
-          <Checkbox
-            label="Offboarded"
-            checked={filters.status.includes('offboarded')}
-            onChange={() => toggleStatus('offboarded')}
-          />
-        </StatusPills>
-
-        <ViewToggle
-          value={filters.viewMode}
-          onChange={(m: ViewMode) => setViewMode(m)}
-        />
+        <StatusPillGroup>
+          {STATUS_PILLS.map(({ key, label, color }) => (
+            <StatusPill
+              key={key}
+              type="button"
+              $active={filters.status.includes(key)}
+              $color={color}
+              onClick={() => toggleStatus(key)}
+              aria-pressed={filters.status.includes(key)}
+            >
+              {label}
+            </StatusPill>
+          ))}
+        </StatusPillGroup>
       </Toolbar>
 
+      {/* Country / type / group-by / saved filters — compact single row */}
       <PeopleFilters
         filters={filters}
         countries={COUNTRIES}
@@ -201,29 +209,20 @@ export const PeoplePage = () => {
         onLoadFilter={handleLoadFilter}
       />
 
+      {/* Fixed-height table card with integrated footer */}
       <ErrorBoundary FallbackComponent={ErrorFallback}>
-        {filters.viewMode === 'pagination' ? (
-          <PeopleTable
-            filters={queryFilters}
-            onRowClick={handleRowClick}
-            onPageChange={setPage}
-            onLimitChange={setLimit}
-            onSort={handleSort}
-          />
-        ) : (
-          <InfiniteScrollTable
-            filters={queryFilters}
-            onRowClick={handleRowClick}
-            onSort={handleSort}
-          />
-        )}
+        <TableCard
+          filters={queryFilters}
+          viewMode={filters.viewMode}
+          onRowClick={handleRowClick}
+          onSort={handleSort}
+          onPageChange={setPage}
+          onLimitChange={setLimit}
+          onViewModeChange={(m: ViewMode) => setViewMode(m)}
+        />
       </ErrorBoundary>
 
-      <PersonDrawer
-        person={selectedPerson}
-        onClose={() => setSelectedPerson(null)}
-      />
-
+      <PersonDrawer person={selectedPerson} onClose={() => setSelectedPerson(null)} />
       <AddMemberModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
