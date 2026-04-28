@@ -186,6 +186,7 @@ export const PeoplePage = () => {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onClear={() => setSearchInput('')}
+            disabled={isFetching}
             aria-label="Search people"
             data-testid="search-input"
           />

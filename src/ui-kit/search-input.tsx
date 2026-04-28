@@ -30,6 +30,12 @@ const StyledInput = styled.input`
     border-color: var(--colors-brand);
     box-shadow: 0 0 0 3px rgba(98, 77, 227, 0.15);
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--colors-gray-100);
+  }
 `;
 
 const SearchIconWrapper = styled.span`
