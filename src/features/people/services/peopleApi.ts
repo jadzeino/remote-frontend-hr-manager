@@ -59,6 +59,14 @@ export async function fetchPeople(query: PeopleQuery): Promise<PeopleResponse> {
   };
 }
 
+export async function fetchStatusCount(status: string | null): Promise<number> {
+  const params = new URLSearchParams({ _limit: '1' });
+  if (status) params.set('status', status);
+  const res = await fetch(`${BASE_URL}/people?${params}`);
+  if (!res.ok) throw new Error('Failed to fetch count');
+  return parseInt(res.headers.get('X-Total-Count') ?? '0', 10);
+}
+
 export async function createPerson(
   person: Omit<Person, 'id'>
 ): Promise<Person> {
