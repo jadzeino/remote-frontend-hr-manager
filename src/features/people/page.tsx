@@ -15,7 +15,8 @@ import { PersonDrawer } from './components/PersonDrawer/PersonDrawer';
 import { COUNTRIES } from './constants';
 import { Person, GroupBy, ViewMode } from './types';
 import { exportAllPeople } from './services/peopleApi';
-import { downloadCsv } from './utils/exportCsv';
+import { exportPeople, ExportFormat } from './utils/exportData';
+import { ExportButton } from './components/ExportButton/ExportButton';
 
 const Container = styled.main`
   max-width: var(--layout-width);
@@ -134,7 +135,7 @@ export const PeoplePage = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  const handleExport = useCallback(async () => {
+  const handleExport = useCallback(async (format: ExportFormat) => {
     setIsExporting(true);
     try {
       const people = await exportAllPeople({
@@ -145,8 +146,7 @@ export const PeoplePage = () => {
         sortBy: filters.sortBy || undefined,
         order: filters.order !== 'none' ? filters.order : undefined,
       });
-      const timestamp = new Date().toISOString().slice(0, 10);
-      downloadCsv(people, `people-${timestamp}.csv`);
+      await exportPeople(people, format);
     } finally {
       setIsExporting(false);
     }
@@ -189,14 +189,12 @@ export const PeoplePage = () => {
           <Title data-testid="page-title">People</Title>
           <Subtitle>Manage your team members, contracts, and onboarding.</Subtitle>
         </TitleBlock>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Button
-            variant="secondary"
-            onClick={handleExport}
-            disabled={isFetching || isExporting}
-          >
-            {isExporting ? 'Exporting…' : 'Export CSV'}
-          </Button>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <ExportButton
+            onExport={handleExport}
+            isExporting={isExporting}
+            disabled={isFetching}
+          />
           <Button onClick={() => setIsAddModalOpen(true)}>+ Add member</Button>
         </div>
       </TitleRow>
