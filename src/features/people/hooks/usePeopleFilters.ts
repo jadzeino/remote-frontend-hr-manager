@@ -1,0 +1,143 @@
+import { useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { sanitizeInput } from '../utils/sanitize';
+import { GroupBy, PeopleFiltersState, ViewMode } from '../types';
+
+const DEFAULT_LIMIT = 20;
+
+function parseStatus(raw: string | null): string[] {
+  if (!raw) return [];
+  return raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+export function usePeopleFilters(): {
+  filters: PeopleFiltersState;
+  setSearch: (v: string) => void;
+  toggleStatus: (status: string) => void;
+  setCountry: (v: string) => void;
+  setRole: (v: string) => void;
+  setPage: (page: number) => void;
+  setLimit: (limit: number) => void;
+  setSortBy: (column: string, order: 'asc' | 'desc' | 'none') => void;
+  setGroupBy: (g: GroupBy) => void;
+  setViewMode: (m: ViewMode) => void;
+  clearAllFilters: () => void;
+} {
+  const [params, setParams] = useSearchParams();
+
+  const filters: PeopleFiltersState = {
+    search: params.get('search') ?? '',
+    status: parseStatus(params.get('status')),
+    country: params.get('country') ?? '',
+    role: params.get('role') ?? '',
+    page: parseInt(params.get('page') ?? '1', 10),
+    limit: parseInt(params.get('limit') ?? String(DEFAULT_LIMIT), 10),
+    sortBy: params.get('sortBy') ?? '',
+    order: (params.get('order') as PeopleFiltersState['order']) ?? 'none',
+    groupBy: (params.get('groupBy') as GroupBy) ?? 'none',
+    viewMode: (params.get('viewMode') as ViewMode) ?? 'pagination',
+  };
+
+  const update = useCallback(
+    (updates: Record<string, string>) => {
+      setParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          for (const [key, val] of Object.entries(updates)) {
+            if (val === '' || val === 'none') {
+              next.delete(key);
+            } else {
+              next.set(key, val);
+            }
+          }
+          return next;
+        },
+        { replace: true }
+      );
+    },
+    [setParams]
+  );
+
+  const setSearch = useCallback(
+    (v: string) => update({ search: sanitizeInput(v), page: '1' }),
+    [update]
+  );
+
+  const toggleStatus = useCallback(
+    (status: string) => {
+      const current = parseStatus(params.get('status'));
+      const next = current.includes(status)
+        ? current.filter((s) => s !== status)
+        : [...current, status];
+      update({ status: next.join(','), page: '1' });
+    },
+    [params, update]
+  );
+
+  const setCountry = useCallback(
+    (v: string) => update({ country: v, page: '1' }),
+    [update]
+  );
+
+  const setRole = useCallback(
+    (v: string) => update({ role: v, page: '1' }),
+    [update]
+  );
+
+  const setPage = useCallback(
+    (page: number) => update({ page: String(page) }),
+    [update]
+  );
+
+  const setLimit = useCallback(
+    (limit: number) => update({ limit: String(limit), page: '1' }),
+    [update]
+  );
+
+  const setSortBy = useCallback(
+    (column: string, order: 'asc' | 'desc' | 'none') => {
+      update({ sortBy: order === 'none' ? '' : column, order, page: '1' });
+    },
+    [update]
+  );
+
+  const setGroupBy = useCallback(
+    (g: GroupBy) => update({ groupBy: g }),
+    [update]
+  );
+
+  const setViewMode = useCallback(
+    (m: ViewMode) => update({ viewMode: m, page: '1' }),
+    [update]
+  );
+
+  const clearAllFilters = useCallback(() => {
+    setParams(
+      (prev) => {
+        const next = new URLSearchParams();
+        // Preserve non-filter params
+        const viewMode = prev.get('viewMode');
+        if (viewMode) next.set('viewMode', viewMode);
+        return next;
+      },
+      { replace: true }
+    );
+  }, [setParams]);
+
+  return {
+    filters,
+    setSearch,
+    toggleStatus,
+    setCountry,
+    setRole,
+    setPage,
+    setLimit,
+    setSortBy,
+    setGroupBy,
+    setViewMode,
+    clearAllFilters,
+  };
+}
