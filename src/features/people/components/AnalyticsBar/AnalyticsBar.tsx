@@ -97,8 +97,20 @@ const CardLabel = styled.span`
 `;
 
 const SkeletonCard = styled.div`
-  height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: var(--colors-blank);
+  border: 1.5px solid transparent;
   border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+`;
+
+const SkeletonPulse = styled.div<{ $w?: string; $h?: string; $radius?: string }>`
+  width: ${({ $w }) => $w ?? '100%'};
+  height: ${({ $h }) => $h ?? '14px'};
+  border-radius: ${({ $radius }) => $radius ?? '6px'};
   background: linear-gradient(
     90deg,
     var(--colors-gray-100) 25%,
@@ -106,7 +118,8 @@ const SkeletonCard = styled.div`
     var(--colors-gray-100) 75%
   );
   background-size: 400px 100%;
-  animation: ${shimmer} 1.2s infinite linear;
+  animation: ${shimmer} 1.4s infinite linear;
+  flex-shrink: 0;
 `;
 
 type StatStatus = 'active' | 'onboarding' | 'offboarded';
@@ -167,7 +180,15 @@ export const AnalyticsBar = ({ activeStatuses, onToggleStatus }: Props) => {
 
       <CardsRow $visible={open}>
         {isLoading
-          ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} aria-busy="true" aria-label="Loading stat">
+                <SkeletonPulse $w="40px" $h="40px" $radius="10px" />
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <SkeletonPulse $w="60%" $h="22px" />
+                  <SkeletonPulse $w="80%" $h="12px" />
+                </div>
+              </SkeletonCard>
+            ))
           : CARDS.map((card) => {
               const isActive = card.key !== null && activeStatuses.includes(card.key);
               const count = card.key === null ? values.total : values[card.key];
