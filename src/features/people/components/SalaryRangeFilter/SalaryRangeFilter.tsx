@@ -367,7 +367,10 @@ export const SalaryRangeFilter = ({
             <ResetBtn
               type="button"
               onClick={handleReset}
-              disabled={localCurrency === 'All'}
+              disabled={
+                localCurrency === 'All' &&
+                (!bounds.min || (localMin <= bounds.min && localMax >= bounds.max))
+              }
             >
               Reset
             </ResetBtn>
