@@ -1,22 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useSalaryBounds } from '../../hooks/useSalaryBounds';
-import { useDebounce } from '../../hooks/useDebounce';
 
 const CURRENCIES = ['All', 'USD', 'EUR', 'GBP'] as const;
-const STEP = 100000; // $1,000 increments in cents
+const STEP = 100000;
 
-function fmt(cents: number): string {
+function fmt(cents: number, currency: string): string {
   const val = Math.round(cents / 100);
-  return val >= 1000 ? `${Math.round(val / 1000)}k` : `${val}`;
-}
-
-function fmtFull(cents: number, currency: string): string {
   const symbol = currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
-  return `${symbol}${fmt(cents)}`;
+  const short = val >= 1000 ? `${Math.round(val / 1000)}k` : `${val}`;
+  return `${symbol}${short}`;
 }
 
-// ─── Styled components ───────────────────────────────────────────────────────
+// ─── Styled components ────────────────────────────────────────────────────────
 
 const Wrapper = styled.div`
   position: relative;
@@ -47,6 +43,14 @@ const TriggerBtn = styled.button<{ $active: boolean }>`
     opacity: 0.45;
     cursor: not-allowed;
   }
+`;
+
+const ActiveDot = styled.span`
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--colors-brand);
+  flex-shrink: 0;
 `;
 
 const Panel = styled.div<{ $open: boolean }>`
@@ -113,8 +117,8 @@ const ResetBtn = styled.button`
   padding: 0;
   text-decoration: underline;
   transition: color 0.15s;
-  &:hover { color: var(--colors-gray-700); }
-  &:disabled { opacity: 0.4; cursor: not-allowed; }
+  &:hover:not(:disabled) { color: var(--colors-gray-700); }
+  &:disabled { opacity: 0.35; cursor: not-allowed; text-decoration: none; }
 `;
 
 const SliderWrapper = styled.div`
@@ -164,10 +168,7 @@ const RangeInput = styled.input<{ $zIndex: number }>`
     cursor: pointer;
     pointer-events: all;
     transition: box-shadow 0.15s ease;
-  }
-
-  &::-webkit-slider-thumb:hover {
-    box-shadow: 0 0 0 4px rgba(98, 77, 227, 0.15);
+    &:hover { box-shadow: 0 0 0 4px rgba(98, 77, 227, 0.15); }
   }
 
   &::-moz-range-thumb {
@@ -179,11 +180,6 @@ const RangeInput = styled.input<{ $zIndex: number }>`
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
     cursor: pointer;
     pointer-events: all;
-  }
-
-  &:disabled {
-    &::-webkit-slider-thumb { cursor: not-allowed; opacity: 0.5; }
-    &::-moz-range-thumb { cursor: not-allowed; opacity: 0.5; }
   }
 `;
 
@@ -231,10 +227,26 @@ const Divider = styled.div`
 const FooterNote = styled.p`
   font-size: 1.1rem;
   color: var(--colors-gray-400);
-  margin: 0;
+  margin: 0 0 12px;
 `;
 
-// ─── Component ───────────────────────────────────────────────────────────────
+const ApplyBtn = styled.button`
+  width: 100%;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: var(--colors-brand);
+  color: var(--colors-blank);
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover { background: #4f3bc0; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+`;
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 type Props = {
   salaryMin: number;
@@ -258,35 +270,30 @@ export const SalaryRangeFilter = ({
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const activeCurrency = salaryCurrency || null;
-  const { bounds, isLoading } = useSalaryBounds(activeCurrency);
-
+  // Local draft state — nothing is applied until Apply is clicked
+  const [localCurrency, setLocalCurrency] = useState<string>(salaryCurrency || 'All');
   const [localMin, setLocalMin] = useState(0);
   const [localMax, setLocalMax] = useState(0);
 
-  // Sync local slider when bounds load or currency changes
+  const { bounds, isLoading } = useSalaryBounds(localCurrency === 'All' ? null : localCurrency);
+
+  // When bounds load (on mount or currency change), reset slider to bounds
+  // but respect any already-applied range if currency matches
+  const boundsKey = `${bounds.min}:${bounds.max}`;
   useEffect(() => {
     if (!bounds.min || !bounds.max) return;
-    setLocalMin(salaryMin > 0 ? salaryMin : bounds.min);
-    setLocalMax(salaryMax > 0 ? salaryMax : bounds.max);
-  }, [bounds.min, bounds.max, salaryMin, salaryMax]);
-
-  const debouncedMin = useDebounce(localMin, 400);
-  const debouncedMax = useDebounce(localMax, 400);
-  const isInitialized = useRef(false);
-
-  useEffect(() => {
-    if (!bounds.min || !bounds.max || !isInitialized.current) {
-      isInitialized.current = true;
-      return;
-    }
-    const atBounds = debouncedMin <= bounds.min && debouncedMax >= bounds.max;
-    if (atBounds) onClearSalary();
-    else onSetSalaryRange(debouncedMin, debouncedMax);
+    const currencyMatches = localCurrency === (salaryCurrency || 'All');
+    setLocalMin(currencyMatches && salaryMin > 0 ? salaryMin : bounds.min);
+    setLocalMax(currencyMatches && salaryMax > 0 ? salaryMax : bounds.max);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedMin, debouncedMax]);
+  }, [boundsKey]);
 
-  // Click outside to close
+  // When panel opens, sync draft from currently applied state
+  useEffect(() => {
+    if (open) setLocalCurrency(salaryCurrency || 'All');
+  }, [open, salaryCurrency]);
+
+  // Click-outside to close
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -297,37 +304,37 @@ export const SalaryRangeFilter = ({
   }, [open]);
 
   const handleCurrencyChange = (c: string) => {
-    isInitialized.current = false;
-    onSetSalaryCurrency(c === 'All' ? '' : c);
+    setLocalCurrency(c);
+    // bounds effect will fire when new bounds arrive and reset slider
   };
 
   const handleReset = () => {
     if (!bounds.min || !bounds.max) return;
-    isInitialized.current = false;
     setLocalMin(bounds.min);
     setLocalMax(bounds.max);
     onClearSalary();
+    onSetSalaryCurrency('');
+    setLocalCurrency('All');
   };
 
-  const handleMinChange = (v: number) => {
-    setLocalMin(Math.min(v, localMax - STEP));
+  const handleApply = () => {
+    const currency = localCurrency === 'All' ? '' : localCurrency;
+    onSetSalaryCurrency(currency);
+    const atBounds = localMin <= bounds.min && localMax >= bounds.max;
+    if (atBounds) onClearSalary();
+    else onSetSalaryRange(localMin, localMax);
+    setOpen(false);
   };
 
-  const handleMaxChange = (v: number) => {
-    setLocalMax(Math.max(v, localMin + STEP));
-  };
+  const handleMinChange = (v: number) => setLocalMin(Math.min(v, localMax - STEP));
+  const handleMaxChange = (v: number) => setLocalMax(Math.max(v, localMin + STEP));
 
   const range = bounds.max - bounds.min || 1;
   const leftPct = ((localMin - bounds.min) / range) * 100;
   const rightPct = ((localMax - bounds.min) / range) * 100;
 
-  const isActive = salaryMin > 0 || salaryMax > 0;
-  const displayCurrency = salaryCurrency || 'All';
-  const symbol = displayCurrency === 'EUR' ? '€' : displayCurrency === 'GBP' ? '£' : '$';
-
-  const triggerLabel = isActive
-    ? `${fmtFull(localMin, displayCurrency)}–${fmtFull(localMax, displayCurrency)}`
-    : `${symbol} Salary`;
+  const isActive = salaryMin > 0 || salaryMax > 0 || Boolean(salaryCurrency);
+  const displaySymbol = salaryCurrency === 'EUR' ? '€' : salaryCurrency === 'GBP' ? '£' : '$';
 
   return (
     <Wrapper ref={wrapperRef}>
@@ -338,7 +345,10 @@ export const SalaryRangeFilter = ({
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
-        {triggerLabel}
+        {isActive && <ActiveDot aria-hidden="true" />}
+        {isActive
+          ? `${displaySymbol} Salary`
+          : `$ Salary`}
       </TriggerBtn>
 
       <Panel $open={open} role="dialog" aria-label="Salary range filter">
@@ -346,7 +356,7 @@ export const SalaryRangeFilter = ({
           <PanelTitle>Salary range</PanelTitle>
           <HeaderRight>
             <CurrencySelect
-              value={displayCurrency}
+              value={localCurrency}
               onChange={(e) => handleCurrencyChange(e.target.value)}
               aria-label="Currency"
             >
@@ -357,7 +367,7 @@ export const SalaryRangeFilter = ({
             <ResetBtn
               type="button"
               onClick={handleReset}
-              disabled={!isActive || isLoading}
+              disabled={localCurrency === 'All'}
             >
               Reset
             </ResetBtn>
@@ -397,22 +407,27 @@ export const SalaryRangeFilter = ({
             </SliderWrapper>
 
             <ValuesRow>
-              <ValBox>{fmtFull(localMin, displayCurrency)}</ValBox>
+              <ValBox>{fmt(localMin, localCurrency)}</ValBox>
               <ToLabel>to</ToLabel>
-              <ValBox>{fmtFull(localMax, displayCurrency)}</ValBox>
+              <ValBox>{fmt(localMax, localCurrency)}</ValBox>
             </ValuesRow>
 
             <BoundsRow>
-              <span>{fmtFull(bounds.min, displayCurrency)}</span>
-              <span>{fmtFull(bounds.max, displayCurrency)}</span>
+              <span>{fmt(bounds.min, localCurrency)}</span>
+              <span>{fmt(bounds.max, localCurrency)}</span>
             </BoundsRow>
 
             <Divider />
+
             <FooterNote>
-              {displayCurrency === 'All'
+              {localCurrency === 'All'
                 ? 'Comparing raw values across currencies.'
-                : `Salaries are stored in ${displayCurrency}.`}
+                : `Salaries filtered by ${localCurrency}.`}
             </FooterNote>
+
+            <ApplyBtn type="button" onClick={handleApply} disabled={disabled}>
+              Apply
+            </ApplyBtn>
           </>
         )}
       </Panel>
