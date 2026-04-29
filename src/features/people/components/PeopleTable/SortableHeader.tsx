@@ -1,7 +1,7 @@
 import { TableThCell } from '@/ui-kit/table';
 import styled from 'styled-components';
 
-const SortButton = styled.button`
+const SortButton = styled.button<{ $active: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -10,12 +10,16 @@ const SortButton = styled.button`
   cursor: pointer;
   font-size: inherit;
   font-weight: 600;
-  color: var(--Grey-600, #4B5865);
+  color: ${({ $active }) => ($active ? 'var(--colors-gray-900, #0F1A24)' : 'var(--Grey-600, #4B5865)')};
   padding: 0;
   font-family: inherit;
   text-transform: uppercase;
   letter-spacing: 0.02em;
-  transition: opacity 0.15s ease;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--colors-gray-900, #0F1A24);
+  }
 
   &:focus-visible {
     outline: 2px solid var(--colors-brand);
@@ -29,13 +33,42 @@ const SortButton = styled.button`
   }
 `;
 
-const SortIndicator = styled.span`
-  font-size: 1rem;
-  color: var(--colors-gray-400);
-  line-height: 1;
+const SortIconWrapper = styled.span<{ $active: boolean }>`
+  display: inline-flex;
+  color: ${({ $active }) => ($active ? 'var(--colors-brand, #4F6AF5)' : 'var(--colors-gray-400, #94A3B8)')};
+  transition: color 0.15s ease;
+
+  ${SortButton}:hover & {
+    color: ${({ $active }) => ($active ? 'var(--colors-brand, #4F6AF5)' : 'var(--Grey-600, #4B5865)')};
+  }
 `;
 
 type Order = 'asc' | 'desc' | 'none';
+
+function SortIcon({ order }: { order: Order }) {
+  if (order === 'asc') {
+    return (
+      <svg width="10" height="12" viewBox="0 0 10 12" fill="none" aria-hidden="true">
+        <path d="M5 1L9 5H1L5 1Z" fill="currentColor" />
+        <path d="M5 11L1 7H9L5 11Z" fill="currentColor" fillOpacity="0.3" />
+      </svg>
+    );
+  }
+  if (order === 'desc') {
+    return (
+      <svg width="10" height="12" viewBox="0 0 10 12" fill="none" aria-hidden="true">
+        <path d="M5 1L9 5H1L5 1Z" fill="currentColor" fillOpacity="0.3" />
+        <path d="M5 11L1 7H9L5 11Z" fill="currentColor" />
+      </svg>
+    );
+  }
+  return (
+    <svg width="10" height="12" viewBox="0 0 10 12" fill="none" aria-hidden="true">
+      <path d="M5 1L9 5H1L5 1Z" fill="currentColor" />
+      <path d="M5 11L1 7H9L5 11Z" fill="currentColor" />
+    </svg>
+  );
+}
 
 type Props = {
   column: string;
@@ -51,12 +84,6 @@ function nextOrder(current: Order): Order {
   if (current === 'none') return 'asc';
   if (current === 'asc') return 'desc';
   return 'none';
-}
-
-function indicator(order: Order): string {
-  if (order === 'asc') return '↑';
-  if (order === 'desc') return '↓';
-  return '⇅';
 }
 
 export const SortableHeader = ({
@@ -81,6 +108,7 @@ export const SortableHeader = ({
         type="button"
         onClick={handleClick}
         disabled={disabled}
+        $active={isActive && activeOrder !== 'none'}
         aria-label={`Sort by ${label}`}
         aria-sort={
           isActive && activeOrder !== 'none'
@@ -91,9 +119,9 @@ export const SortableHeader = ({
         }
       >
         {label}
-        <SortIndicator aria-hidden="true">
-          {isActive ? indicator(activeOrder) : '⇅'}
-        </SortIndicator>
+        <SortIconWrapper $active={isActive && activeOrder !== 'none'}>
+          <SortIcon order={activeOrder} />
+        </SortIconWrapper>
       </SortButton>
     </TableThCell>
   );
