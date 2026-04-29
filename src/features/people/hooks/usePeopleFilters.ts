@@ -17,6 +17,7 @@ export function usePeopleFilters(): {
   setSearch: (v: string) => void;
   toggleStatus: (status: string) => void;
   setStatus: (statuses: string[]) => void;
+  loadFilter: (f: { search?: string; status?: string[]; country?: string; role?: string; groupBy?: string }) => void;
   setCountry: (v: string) => void;
   setRole: (v: string) => void;
   setPage: (page: number) => void;
@@ -85,6 +86,33 @@ export function usePeopleFilters(): {
   const setStatus = useCallback(
     (statuses: string[]) => update({ status: statuses.join(','), page: '1' }),
     [update]
+  );
+
+  const loadFilter = useCallback(
+    (f: { search?: string; status?: string[]; country?: string; role?: string; groupBy?: string }) => {
+      setParams((prev) => {
+        const next = new URLSearchParams(prev);
+        // Apply all fields atomically in one navigation
+        if (f.search !== undefined) {
+          if (f.search) next.set('search', sanitizeInput(f.search)); else next.delete('search');
+        }
+        if (f.status !== undefined) {
+          if (f.status.length) next.set('status', f.status.join(',')); else next.delete('status');
+        }
+        if (f.country !== undefined) {
+          if (f.country) next.set('country', f.country); else next.delete('country');
+        }
+        if (f.role !== undefined) {
+          if (f.role) next.set('role', f.role); else next.delete('role');
+        }
+        if (f.groupBy !== undefined) {
+          if (f.groupBy && f.groupBy !== 'none') next.set('groupBy', f.groupBy); else next.delete('groupBy');
+        }
+        next.set('page', '1');
+        return next;
+      });
+    },
+    [setParams]
   );
 
   const setCountry = useCallback(
@@ -166,6 +194,7 @@ export function usePeopleFilters(): {
     setSearch,
     toggleStatus,
     setStatus,
+    loadFilter,
     setCountry,
     setRole,
     setPage,

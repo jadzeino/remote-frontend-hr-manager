@@ -78,7 +78,6 @@ export const PeoplePage = () => {
     filters,
     setSearch,
     toggleStatus,
-    setStatus,
     setCountry,
     setRole,
     setPage,
@@ -86,6 +85,7 @@ export const PeoplePage = () => {
     setSortBy,
     setGroupBy,
     setViewMode,
+    loadFilter,
     applySalaryFilter,
     clearSalaryFilter,
     clearAllFilters,
@@ -136,14 +136,12 @@ export const PeoplePage = () => {
 
   const handleLoadFilter = useCallback(
     (f: { search?: string; status?: string[]; country?: string; role?: string; groupBy?: GroupBy }) => {
-      if (f.search !== undefined) { setSearchInput(f.search); setSearch(f.search); }
-      if (f.status !== undefined) setStatus(f.status);
-      if (f.country !== undefined) setCountry(f.country ?? '');
-      if (f.role !== undefined) setRole(f.role ?? '');
-      if (f.groupBy !== undefined) setGroupBy(f.groupBy);
-      else setGroupBy('none');
+      // Sync the local search input state
+      if (f.search !== undefined) setSearchInput(f.search);
+      // Apply all URL params in one atomic navigate call
+      loadFilter(f);
     },
-    [setSearch, setStatus, setCountry, setRole, setGroupBy]
+    [loadFilter]
   );
 
   const handleClearAll = useCallback(() => {
