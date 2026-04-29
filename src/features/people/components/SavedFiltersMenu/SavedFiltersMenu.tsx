@@ -105,11 +105,6 @@ const FilterName = styled.span`
   white-space: nowrap;
 `;
 
-const FilterMeta = styled.span`
-  font-size: 1.1rem;
-  color: var(--colors-gray-400);
-  white-space: nowrap;
-`;
 
 const DeleteBtn = styled.button`
   display: flex;
@@ -229,15 +224,6 @@ function filtersMatch(a: CurrentFilters, b: CurrentFilters): boolean {
   return aStatus === bStatus;
 }
 
-function formatMeta(f: SavedFilter): string {
-  const parts: string[] = [];
-  if (f.filters.status?.length) parts.push(f.filters.status.join(', '));
-  if (f.filters.country) parts.push(f.filters.country);
-  if (f.filters.role) parts.push(f.filters.role);
-  if (f.filters.groupBy) parts.push(`grouped by ${f.filters.groupBy}`);
-  if (f.filters.search) parts.push(`"${f.filters.search}"`);
-  return parts.join(' · ') || 'No filters';
-}
 
 type Props = {
   savedFilters: SavedFilter[];
@@ -306,10 +292,7 @@ export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApp
           <FilterList>
             {savedFilters.map((sf) => (
               <FilterItem key={sf.id} onClick={() => { onApply(sf.filters); setOpen(false); }}>
-                <div style={{ flex: 1, overflow: 'hidden' }}>
-                  <FilterName title={sf.name}>{sf.name}</FilterName>
-                  <FilterMeta>{formatMeta(sf)}</FilterMeta>
-                </div>
+                <FilterName title={sf.name}>{sf.name}</FilterName>
                 <DeleteBtn
                   type="button"
                   title="Delete saved filter"
