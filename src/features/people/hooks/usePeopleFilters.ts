@@ -23,8 +23,7 @@ export function usePeopleFilters(): {
   setSortBy: (column: string, order: 'asc' | 'desc' | 'none') => void;
   setGroupBy: (g: GroupBy) => void;
   setViewMode: (m: ViewMode) => void;
-  setSalaryRange: (min: number, max: number) => void;
-  setSalaryCurrency: (currency: string) => void;
+  applySalaryFilter: (min: number, max: number, currency: string) => void;
   clearSalaryFilter: () => void;
   clearAllFilters: () => void;
 } {
@@ -119,10 +118,11 @@ export function usePeopleFilters(): {
     [update]
   );
 
-  const setSalaryRange = useCallback(
-    (min: number, max: number) => {
+  const applySalaryFilter = useCallback(
+    (min: number, max: number, currency: string) => {
       setParams((prev) => {
         const next = new URLSearchParams(prev);
+        if (currency) next.set('salaryCurrency', currency); else next.delete('salaryCurrency');
         if (min > 0) next.set('salaryMin', String(min)); else next.delete('salaryMin');
         if (max > 0) next.set('salaryMax', String(max)); else next.delete('salaryMax');
         next.delete('page');
@@ -132,25 +132,12 @@ export function usePeopleFilters(): {
     [setParams]
   );
 
-  const setSalaryCurrency = useCallback(
-    (currency: string) => {
-      setParams((prev) => {
-        const next = new URLSearchParams(prev);
-        if (currency) next.set('salaryCurrency', currency); else next.delete('salaryCurrency');
-        next.delete('salaryMin');
-        next.delete('salaryMax');
-        next.delete('page');
-        return next;
-      }, { replace: false });
-    },
-    [setParams]
-  );
-
   const clearSalaryFilter = useCallback(() => {
     setParams((prev) => {
       const next = new URLSearchParams(prev);
       next.delete('salaryMin');
       next.delete('salaryMax');
+      next.delete('salaryCurrency');
       return next;
     }, { replace: true });
   }, [setParams]);
@@ -179,8 +166,7 @@ export function usePeopleFilters(): {
     setSortBy,
     setGroupBy,
     setViewMode,
-    setSalaryRange,
-    setSalaryCurrency,
+    applySalaryFilter,
     clearSalaryFilter,
     clearAllFilters,
   };

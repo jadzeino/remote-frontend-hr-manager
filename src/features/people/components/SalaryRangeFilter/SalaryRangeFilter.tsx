@@ -253,8 +253,7 @@ type Props = {
   salaryMax: number;
   salaryCurrency: string;
   disabled?: boolean;
-  onSetSalaryRange: (min: number, max: number) => void;
-  onSetSalaryCurrency: (currency: string) => void;
+  onApplySalaryFilter: (min: number, max: number, currency: string) => void;
   onClearSalary: () => void;
 };
 
@@ -263,8 +262,7 @@ export const SalaryRangeFilter = ({
   salaryMax,
   salaryCurrency,
   disabled,
-  onSetSalaryRange,
-  onSetSalaryCurrency,
+  onApplySalaryFilter,
   onClearSalary,
 }: Props) => {
   const [open, setOpen] = useState(false);
@@ -272,8 +270,8 @@ export const SalaryRangeFilter = ({
 
   // Local draft state — nothing is applied until Apply is clicked
   const [localCurrency, setLocalCurrency] = useState<string>(salaryCurrency || 'All');
-  const [localMin, setLocalMin] = useState(0);
-  const [localMax, setLocalMax] = useState(0);
+  const [localMin, setLocalMin] = useState(salaryMin > 0 ? salaryMin : 0);
+  const [localMax, setLocalMax] = useState(salaryMax > 0 ? salaryMax : 0);
 
   const { bounds, isLoading } = useSalaryBounds(localCurrency === 'All' ? null : localCurrency);
 
@@ -283,8 +281,8 @@ export const SalaryRangeFilter = ({
   useEffect(() => {
     if (!bounds.min || !bounds.max) return;
     const currencyMatches = localCurrency === (salaryCurrency || 'All');
-    setLocalMin(currencyMatches && salaryMin > 0 ? salaryMin : bounds.min);
-    setLocalMax(currencyMatches && salaryMax > 0 ? salaryMax : bounds.max);
+    setLocalMin((prev) => (currencyMatches && prev > 0) ? prev : (currencyMatches && salaryMin > 0 ? salaryMin : bounds.min));
+    setLocalMax((prev) => (currencyMatches && prev > 0) ? prev : (currencyMatches && salaryMax > 0 ? salaryMax : bounds.max));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boundsKey]);
 
@@ -312,17 +310,14 @@ export const SalaryRangeFilter = ({
     if (!bounds.min || !bounds.max) return;
     setLocalMin(bounds.min);
     setLocalMax(bounds.max);
-    onClearSalary();
-    onSetSalaryCurrency('');
     setLocalCurrency('All');
+    onClearSalary();
   };
 
   const handleApply = () => {
     const currency = localCurrency === 'All' ? '' : localCurrency;
-    onSetSalaryCurrency(currency);
     const atBounds = localMin <= bounds.min && localMax >= bounds.max;
-    if (atBounds) onClearSalary();
-    else onSetSalaryRange(localMin, localMax);
+    onApplySalaryFilter(atBounds ? 0 : localMin, atBounds ? 0 : localMax, currency);
     setOpen(false);
   };
 

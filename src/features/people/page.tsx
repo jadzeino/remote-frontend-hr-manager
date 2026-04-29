@@ -118,8 +118,7 @@ export const PeoplePage = () => {
     setSortBy,
     setGroupBy,
     setViewMode,
-    setSalaryRange,
-    setSalaryCurrency,
+    applySalaryFilter,
     clearSalaryFilter,
     clearAllFilters,
   } = usePeopleFilters();
@@ -253,8 +252,7 @@ export const PeoplePage = () => {
         onSetGroupBy={(g: GroupBy) => setGroupBy(g)}
         onClearAll={handleClearAll}
         onLoadFilter={handleLoadFilter}
-        onSetSalaryRange={setSalaryRange}
-        onSetSalaryCurrency={setSalaryCurrency}
+        onApplySalaryFilter={applySalaryFilter}
         onClearSalary={clearSalaryFilter}
       />
 

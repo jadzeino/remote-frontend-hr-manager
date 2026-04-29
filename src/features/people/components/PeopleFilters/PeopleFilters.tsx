@@ -96,8 +96,7 @@ type Props = {
   onSetGroupBy: (g: GroupBy) => void;
   onClearAll: () => void;
   onLoadFilter: (f: { search?: string; status?: string[]; country?: string; role?: string; groupBy?: GroupBy }) => void;
-  onSetSalaryRange: (min: number, max: number) => void;
-  onSetSalaryCurrency: (currency: string) => void;
+  onApplySalaryFilter: (min: number, max: number, currency: string) => void;
   onClearSalary: () => void;
 };
 
@@ -111,8 +110,7 @@ export const PeopleFilters = ({
   onSetGroupBy,
   onClearAll,
   onLoadFilter,
-  onSetSalaryRange,
-  onSetSalaryCurrency,
+  onApplySalaryFilter,
   onClearSalary,
 }: Props) => {
   const { savedFilters, saveCurrentFilters, deleteFilter } = useSavedFilters();
@@ -162,8 +160,7 @@ export const PeopleFilters = ({
           salaryMax={filters.salaryMax}
           salaryCurrency={filters.salaryCurrency}
           disabled={isFetching}
-          onSetSalaryRange={onSetSalaryRange}
-          onSetSalaryCurrency={onSetSalaryCurrency}
+          onApplySalaryFilter={onApplySalaryFilter}
           onClearSalary={onClearSalary}
         />
 
