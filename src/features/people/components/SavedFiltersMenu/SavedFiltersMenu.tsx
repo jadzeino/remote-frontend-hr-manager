@@ -160,11 +160,11 @@ const InputRow = styled.div`
   gap: 6px;
 `;
 
-const NameInput = styled.input`
+const NameInput = styled.input<{ $error?: boolean }>`
   flex: 1;
   height: 32px;
   padding: 0 8px;
-  border: 1px solid var(--colors-gray-300);
+  border: 1px solid ${({ $error }) => ($error ? '#dc2626' : 'var(--colors-gray-300)')};
   border-radius: 6px;
   font-size: 1.3rem;
   color: var(--colors-gray-700);
@@ -173,13 +173,19 @@ const NameInput = styled.input`
 
   &:focus-visible {
     outline: none;
-    border-color: var(--colors-brand);
-    box-shadow: 0 0 0 3px rgba(98, 77, 227, 0.15);
+    border-color: ${({ $error }) => ($error ? '#dc2626' : 'var(--colors-brand)')};
+    box-shadow: 0 0 0 3px ${({ $error }) => ($error ? 'rgba(220,38,38,0.15)' : 'rgba(98,77,227,0.15)')};
   }
 
   &::placeholder {
     color: var(--colors-gray-400);
   }
+`;
+
+const InputError = styled.p`
+  margin: 4px 0 0;
+  font-size: 1.1rem;
+  color: #dc2626;
 `;
 
 const SaveBtn = styled.button`
@@ -243,6 +249,8 @@ export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApp
   const atLimit = savedFilters.length >= MAX_FILTERS;
   const activeFilter = savedFilters.find((sf) => filtersMatch(sf.filters, currentFilters)) ?? null;
   const isDuplicate = activeFilter !== null;
+  const isDuplicateName = name.trim().length > 0 &&
+    savedFilters.some((sf) => sf.name.toLowerCase() === name.trim().toLowerCase());
 
   useEffect(() => {
     if (!open) return;
@@ -261,10 +269,10 @@ export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApp
 
   const handleSave = useCallback(() => {
     const trimmed = name.trim();
-    if (!trimmed || atLimit || isDuplicate) return;
+    if (!trimmed || atLimit || isDuplicate || isDuplicateName) return;
     onSave(trimmed);
     setName('');
-  }, [name, atLimit, isDuplicate, onSave]);
+  }, [name, atLimit, isDuplicate, isDuplicateName, onSave]);
 
   return (
     <Wrapper ref={wrapperRef}>
@@ -328,18 +336,23 @@ export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApp
             <InputRow>
               <NameInput
                 ref={inputRef}
+                $error={isDuplicateName}
                 value={name}
                 onChange={(e) => setName(e.target.value.slice(0, MAX_NAME_LENGTH))}
                 placeholder="Name this filter…"
                 onKeyDown={(e) => e.key === 'Enter' && handleSave()}
                 aria-label="Filter name"
+                aria-describedby={isDuplicateName ? 'name-error' : undefined}
                 maxLength={MAX_NAME_LENGTH}
               />
-              <SaveBtn type="button" onClick={handleSave} disabled={!name.trim()}>
+              <SaveBtn type="button" onClick={handleSave} disabled={!name.trim() || isDuplicateName}>
                 Save
               </SaveBtn>
             </InputRow>
-            {name.length > 0 && (
+            {isDuplicateName && (
+              <InputError id="name-error">Name already exists.</InputError>
+            )}
+            {!isDuplicateName && name.length > 0 && (
               <CharCount $warn={name.length >= MAX_NAME_LENGTH}>
                 {name.length} / {MAX_NAME_LENGTH}
               </CharCount>
