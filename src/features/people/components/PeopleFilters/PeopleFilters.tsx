@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import styled from 'styled-components';
 import { FilterChip } from '@/shared/ui/FilterChip/FilterChip';
+import { Checkbox } from '@/ui-kit/checkbox';
 import { useSavedFilters } from '../../hooks/useSavedFilters';
 import { PeopleFiltersState, GroupBy } from '../../types';
 import { SavedFiltersMenu } from '../SavedFiltersMenu/SavedFiltersMenu';
@@ -154,6 +155,29 @@ export const PeopleFilters = ({
           <option value="employee">Employee</option>
           <option value="contractor">Contractor</option>
         </Select>
+
+        <ControlsDivider />
+
+        <Checkbox
+          label="Onboarding"
+          checked={filters.status.includes('onboarding')}
+          onChange={() => onToggleStatus('onboarding')}
+          disabled={isFetching}
+        />
+        <Checkbox
+          label="Active"
+          checked={filters.status.includes('active')}
+          onChange={() => onToggleStatus('active')}
+          disabled={isFetching}
+        />
+        <Checkbox
+          label="Offboarded"
+          checked={filters.status.includes('offboarded')}
+          onChange={() => onToggleStatus('offboarded')}
+          disabled={isFetching}
+        />
+
+        <ControlsDivider />
 
         <SalaryRangeFilter
           salaryMin={filters.salaryMin}
