@@ -44,10 +44,14 @@ type CellProps = {
 export const TableThCell = styled.th<CellProps>`
   white-space: nowrap;
   padding: 18px 0 18px 16px;
-  font-size: ${({ theme }) => theme.typography.size.xs};
+  font-family: Inter, sans-serif;
+  font-size: 10px;
   font-weight: 600;
-  color: var(--colors-darkBlue);
-  background-color: var(--colors-gray-300);
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--Grey-600, #4B5865);
+  background-color: var(--Grey-100, #EEF2F6);
   text-align: ${(props) => props.$textAlign ?? 'left'};
 
   &:first-child {

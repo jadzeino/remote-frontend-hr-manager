@@ -10,9 +10,11 @@ const SortButton = styled.button`
   cursor: pointer;
   font-size: inherit;
   font-weight: 600;
-  color: var(--colors-darkBlue);
+  color: var(--Grey-600, #4B5865);
   padding: 0;
   font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   transition: opacity 0.15s ease;
 
   &:focus-visible {

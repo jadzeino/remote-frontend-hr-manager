@@ -74,6 +74,17 @@ const Container = styled.label`
     outline: none;
     box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #6638EF;
   }
+
+  &:has(${Input}:disabled) {
+    opacity: 0.45;
+    cursor: not-allowed;
+
+    &:hover {
+      border-color: var(--colors-gray-500, #697786);
+      background-color: var(--colors-blank);
+      --checkbox-tick-color: var(--colors-gray-500, #697786);
+    }
+  }
 `;
 
 type Props = Omit<ComponentPropsWithoutRef<'input'>, 'type'> & {

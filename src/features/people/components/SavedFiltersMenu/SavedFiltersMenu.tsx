@@ -302,7 +302,7 @@ export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApp
         ) : (
           <FilterList>
             {savedFilters.map((sf) => (
-              <FilterItem key={sf.id} onClick={() => { onApply(sf.filters); setOpen(false); }}>
+              <FilterItem key={sf.id} onClick={() => { onApply({ ...sf.filters, groupBy: sf.filters.groupBy ?? 'none' }); setOpen(false); }}>
                 <FilterName title={sf.name}>{sf.name}</FilterName>
                 <DeleteBtn
                   type="button"
