@@ -233,14 +233,6 @@ export const PeopleFilters = ({
       {/* Active filter chips — only when filters are applied */}
       {hasActiveFilters && (
         <ChipsRow>
-          {filters.status.map((s) => (
-            <FilterChip
-              key={s}
-              label={s.charAt(0).toUpperCase() + s.slice(1)}
-              onRemove={() => onToggleStatus(s)}
-              disabled={isFetching}
-            />
-          ))}
           {filters.country && (
             <FilterChip
               label={filters.country}

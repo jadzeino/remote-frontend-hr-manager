@@ -63,33 +63,6 @@ const SearchWrapper = styled.div`
   max-width: 340px;
 `;
 
-const StatusPillGroup = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-`;
-
-const StatusPill = styled.button<{ $active: boolean; $color: string }>`
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1.5px solid ${({ $active, $color }) => ($active ? $color : 'var(--colors-gray-300)')};
-  background: ${({ $active, $color }) => ($active ? $color + '18' : 'var(--colors-blank)')};
-  color: ${({ $active, $color }) => ($active ? $color : 'var(--colors-gray-600)')};
-  font-size: 1.3rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover:not(:disabled) {
-    border-color: ${({ $color }) => $color};
-    color: ${({ $color }) => $color};
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
 
 const ErrorFallback = ({ resetErrorBoundary }: { resetErrorBoundary: () => void }) => (
   <div style={{ padding: 48, textAlign: 'center' }}>
@@ -97,12 +70,6 @@ const ErrorFallback = ({ resetErrorBoundary }: { resetErrorBoundary: () => void 
     <Button onClick={resetErrorBoundary} style={{ marginTop: 16 }}>Try again</Button>
   </div>
 );
-
-const STATUS_PILLS = [
-  { key: 'active',      label: 'Active',      color: '#16a34a' },
-  { key: 'onboarding',  label: 'Onboarding',  color: '#2563eb' },
-  { key: 'offboarded',  label: 'Offboarded',  color: '#9ca3af' },
-] as const;
 
 type StatusKey = 'active' | 'onboarding' | 'offboarded';
 
@@ -224,21 +191,6 @@ export const PeoplePage = () => {
           />
         </SearchWrapper>
 
-        <StatusPillGroup>
-          {STATUS_PILLS.map(({ key, label, color }) => (
-            <StatusPill
-              key={key}
-              type="button"
-              $active={filters.status.includes(key)}
-              $color={color}
-              onClick={() => toggleStatus(key)}
-              aria-pressed={filters.status.includes(key)}
-              disabled={isFetching}
-            >
-              {label}
-            </StatusPill>
-          ))}
-        </StatusPillGroup>
       </Toolbar>
 
       {/* Country / type / group-by / saved filters — compact single row */}
