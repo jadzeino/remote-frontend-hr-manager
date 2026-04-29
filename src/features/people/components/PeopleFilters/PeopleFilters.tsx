@@ -4,6 +4,7 @@ import { FilterChip } from '@/shared/ui/FilterChip/FilterChip';
 import { useSavedFilters } from '../../hooks/useSavedFilters';
 import { PeopleFiltersState, GroupBy } from '../../types';
 import { SavedFiltersMenu } from '../SavedFiltersMenu/SavedFiltersMenu';
+import { SalaryRangeFilter } from '../SalaryRangeFilter/SalaryRangeFilter';
 
 // Single compact row: [Country] [Type] | Group:[select] | [saved chips] [+Save] [Clear all]
 const ControlsBar = styled.div`
@@ -95,6 +96,9 @@ type Props = {
   onSetGroupBy: (g: GroupBy) => void;
   onClearAll: () => void;
   onLoadFilter: (f: { search?: string; status?: string[]; country?: string; role?: string; groupBy?: GroupBy }) => void;
+  onSetSalaryRange: (min: number, max: number) => void;
+  onSetSalaryCurrency: (currency: string) => void;
+  onClearSalary: () => void;
 };
 
 export const PeopleFilters = ({
@@ -107,6 +111,9 @@ export const PeopleFilters = ({
   onSetGroupBy,
   onClearAll,
   onLoadFilter,
+  onSetSalaryRange,
+  onSetSalaryCurrency,
+  onClearSalary,
 }: Props) => {
   const { savedFilters, saveCurrentFilters, deleteFilter } = useSavedFilters();
 
@@ -150,6 +157,16 @@ export const PeopleFilters = ({
           <option value="contractor">Contractor</option>
         </Select>
 
+        <SalaryRangeFilter
+          salaryMin={filters.salaryMin}
+          salaryMax={filters.salaryMax}
+          salaryCurrency={filters.salaryCurrency}
+          disabled={isFetching}
+          onSetSalaryRange={onSetSalaryRange}
+          onSetSalaryCurrency={onSetSalaryCurrency}
+          onClearSalary={onClearSalary}
+        />
+
         <ControlsDivider />
 
         <InlineLabel>Group:</InlineLabel>
@@ -175,6 +192,9 @@ export const PeopleFilters = ({
             country: filters.country || undefined,
             role: filters.role || undefined,
             groupBy: filters.groupBy !== 'none' ? filters.groupBy : undefined,
+            salaryMin: filters.salaryMin > 0 ? filters.salaryMin : undefined,
+            salaryMax: filters.salaryMax > 0 ? filters.salaryMax : undefined,
+            salaryCurrency: filters.salaryCurrency || undefined,
           }}
           disabled={isFetching}
           onApply={onLoadFilter}

@@ -32,6 +32,10 @@ export function buildQueryParams(query: PeopleQuery): URLSearchParams {
     params.set('_order', query.order);
   }
 
+  if (query.salaryCurrency) params.set('currency', query.salaryCurrency);
+  if (query.salaryMin) params.set('salary_gte', String(query.salaryMin));
+  if (query.salaryMax) params.set('salary_lte', String(query.salaryMax));
+
   return params;
 }
 
@@ -65,6 +69,16 @@ export async function fetchStatusCount(status: string | null): Promise<number> {
   const res = await fetch(`${BASE_URL}/people?${params}`);
   if (!res.ok) throw new Error('Failed to fetch count');
   return parseInt(res.headers.get('X-Total-Count') ?? '0', 10);
+}
+
+export async function fetchSalaryBounds(currency: string | null): Promise<{ min: number; max: number }> {
+  const base = currency ? `currency=${currency}&` : '';
+  const [minRes, maxRes] = await Promise.all([
+    fetch(`${BASE_URL}/people?${base}_sort=salary&_order=asc&_limit=1`),
+    fetch(`${BASE_URL}/people?${base}_sort=salary&_order=desc&_limit=1`),
+  ]);
+  const [minData, maxData]: [Person[], Person[]] = await Promise.all([minRes.json(), maxRes.json()]);
+  return { min: minData[0]?.salary ?? 0, max: maxData[0]?.salary ?? 0 };
 }
 
 export async function exportAllPeople(query: Omit<PeopleQuery, 'page' | 'limit'>): Promise<Person[]> {

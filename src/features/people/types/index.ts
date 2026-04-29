@@ -11,6 +11,9 @@ export type PeopleQuery = {
   role?: string;
   sortBy?: string;
   order?: 'asc' | 'desc';
+  salaryMin?: number;
+  salaryMax?: number;
+  salaryCurrency?: string;
 };
 
 export type PeopleResponse = {
@@ -37,6 +40,9 @@ export type SavedFilter = {
     country?: string;
     role?: string;
     groupBy?: GroupBy;
+    salaryMin?: number;
+    salaryMax?: number;
+    salaryCurrency?: string;
   };
   savedAt: string;
 };
@@ -52,4 +58,7 @@ export type PeopleFiltersState = {
   order: 'asc' | 'desc' | 'none';
   groupBy: GroupBy;
   viewMode: ViewMode;
+  salaryMin: number;
+  salaryMax: number;
+  salaryCurrency: string;
 };

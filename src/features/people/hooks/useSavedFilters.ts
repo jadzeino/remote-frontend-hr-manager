@@ -24,6 +24,9 @@ export function useSavedFilters() {
             country: filters.country || undefined,
             role: filters.role || undefined,
             groupBy: filters.groupBy !== 'none' ? filters.groupBy : undefined,
+            salaryMin: filters.salaryMin > 0 ? filters.salaryMin : undefined,
+            salaryMax: filters.salaryMax > 0 ? filters.salaryMax : undefined,
+            salaryCurrency: filters.salaryCurrency || undefined,
           },
           savedAt: new Date().toISOString(),
         };

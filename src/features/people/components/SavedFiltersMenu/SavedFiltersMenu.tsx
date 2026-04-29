@@ -225,6 +225,9 @@ function filtersMatch(a: CurrentFilters, b: CurrentFilters): boolean {
   if ((a.country ?? '') !== (b.country ?? '')) return false;
   if ((a.role ?? '') !== (b.role ?? '')) return false;
   if ((a.groupBy ?? 'none') !== (b.groupBy ?? 'none')) return false;
+  if ((a.salaryMin ?? 0) !== (b.salaryMin ?? 0)) return false;
+  if ((a.salaryMax ?? 0) !== (b.salaryMax ?? 0)) return false;
+  if ((a.salaryCurrency ?? '') !== (b.salaryCurrency ?? '')) return false;
   const aStatus = [...(a.status ?? [])].sort().join(',');
   const bStatus = [...(b.status ?? [])].sort().join(',');
   return aStatus === bStatus;

@@ -118,6 +118,9 @@ export const PeoplePage = () => {
     setSortBy,
     setGroupBy,
     setViewMode,
+    setSalaryRange,
+    setSalaryCurrency,
+    clearSalaryFilter,
     clearAllFilters,
   } = usePeopleFilters();
 
@@ -250,6 +253,9 @@ export const PeoplePage = () => {
         onSetGroupBy={(g: GroupBy) => setGroupBy(g)}
         onClearAll={handleClearAll}
         onLoadFilter={handleLoadFilter}
+        onSetSalaryRange={setSalaryRange}
+        onSetSalaryCurrency={setSalaryCurrency}
+        onClearSalary={clearSalaryFilter}
       />
 
       {/* Fixed-height table card with integrated footer */}
