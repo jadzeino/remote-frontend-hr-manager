@@ -18,7 +18,7 @@ const StyledSelect = styled.select`
   height: 34px;
   padding: 0 32px 0 12px;
   border: 1px solid var(--colors-gray-500, #697786);
-  border-radius: 8px;
+  border-radius: 9999px;
   background-color: var(--colors-blank);
   color: var(--colors-gray-700);
   font-size: ${({ theme }) => theme.typography.size.sm};

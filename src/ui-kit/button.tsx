@@ -53,6 +53,9 @@ type LabelProps = {
 };
 
 const StyledLabel = styled.span<LabelProps>`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   transition: color 250ms;
 
   ${({ theme }) => theme.typography.bodyM}

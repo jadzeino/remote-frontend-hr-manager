@@ -162,7 +162,12 @@ export const PeoplePage = () => {
             isExporting={isExporting}
             disabled={isFetching}
           />
-          <Button onClick={() => setIsAddModalOpen(true)}>+ Add member</Button>
+          <Button onClick={() => setIsAddModalOpen(true)}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M8 8C9.93 8 11.5 6.43 11.5 4.5S9.93 1 8 1 4.5 2.57 4.5 4.5 6.07 8 8 8Zm0 1.5c-2.67 0-8 1.34-8 4V15h16v-1.5c0-2.66-5.33-4-8-4Z" fill="currentColor"/>
+            </svg>
+            Add member
+          </Button>
         </div>
       </TitleRow>
 

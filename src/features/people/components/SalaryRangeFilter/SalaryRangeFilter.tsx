@@ -25,18 +25,25 @@ const TriggerBtn = styled.button<{ $active: boolean }>`
   gap: 6px;
   height: 34px;
   padding: 0 12px;
-  border: 1px solid ${({ $active }) => ($active ? 'var(--colors-brand)' : 'var(--colors-gray-400)')};
-  border-radius: 8px;
+  border: 1px solid ${({ $active }) => ($active ? 'var(--colors-brand)' : 'var(--colors-gray-500, #697786)')};
+  border-radius: 9999px;
   background: ${({ $active }) => ($active ? '#f0eeff' : 'var(--colors-blank)')};
-  color: ${({ $active }) => ($active ? 'var(--colors-brand)' : 'var(--colors-gray-600)')};
+  color: ${({ $active }) => ($active ? 'var(--colors-brand)' : 'var(--colors-gray-700)')};
   font-size: 1.3rem;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
 
   &:hover:not(:disabled) {
-    border-color: var(--colors-brand);
-    color: var(--colors-brand);
+    border-color: #7f5af8;
+    background-color: #f5f3ff;
+    color: #7f5af8;
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: #7f5af8;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #6638ef;
   }
 
   &:disabled {

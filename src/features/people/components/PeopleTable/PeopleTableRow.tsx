@@ -8,6 +8,28 @@ const NameCell = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  overflow: hidden;
+`;
+
+const NameText = styled.span`
+  font-family: Inter, sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: 0;
+  color: var(--Grey-900, #0f1419);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+`;
+
+const RoleText = styled.span`
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const Avatar = styled.img`
@@ -57,10 +79,10 @@ export const PeopleTableRow = ({ person, onClick }: Props) => {
       <TableCell>
         <NameCell>
           <Avatar src={getAvatarUrl(person)} alt={person.name} />
-          {person.name}
+          <NameText>{person.name}</NameText>
         </NameCell>
       </TableCell>
-      <TableCell>{person.jobTitle}</TableCell>
+      <TableCell><RoleText>{person.jobTitle}</RoleText></TableCell>
       <TableCell>{employment}</TableCell>
       <TableCell>
         <Badge status={person.status} />

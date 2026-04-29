@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import styled from 'styled-components';
 import { FilterChip } from '@/shared/ui/FilterChip/FilterChip';
 import { Checkbox } from '@/ui-kit/checkbox';
+import { Dropdown } from '@/ui-kit/dropdown';
 import { useSavedFilters } from '../../hooks/useSavedFilters';
 import { PeopleFiltersState, GroupBy } from '../../types';
 import { SavedFiltersMenu } from '../SavedFiltersMenu/SavedFiltersMenu';
@@ -30,26 +31,6 @@ const ChipsRow = styled.div`
   flex-wrap: wrap;
 `;
 
-const Select = styled.select`
-  height: 34px;
-  padding: 0 8px;
-  border: 1px solid var(--colors-gray-400);
-  border-radius: 8px;
-  background: var(--colors-blank);
-  color: var(--colors-gray-700);
-  font-size: 1.3rem;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-
-  &:hover:not(:disabled) {
-    border-color: var(--colors-brand);
-  }
-
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-`;
 
 const InlineLabel = styled.span`
   font-size: 1.3rem;
@@ -131,7 +112,7 @@ export const PeopleFilters = ({
     <>
       {/* Single compact controls row */}
       <ControlsBar>
-        <Select
+        <Dropdown
           value={filters.country}
           onChange={(e) => onSetCountry(e.target.value)}
           aria-label="Filter by country"
@@ -143,9 +124,9 @@ export const PeopleFilters = ({
               {c}
             </option>
           ))}
-        </Select>
+        </Dropdown>
 
-        <Select
+        <Dropdown
           value={filters.role}
           onChange={(e) => onSetRole(e.target.value)}
           aria-label="Filter by employment type"
@@ -154,7 +135,7 @@ export const PeopleFilters = ({
           <option value="">All types</option>
           <option value="employee">Employee</option>
           <option value="contractor">Contractor</option>
-        </Select>
+        </Dropdown>
 
         <ControlsDivider />
 
@@ -191,7 +172,7 @@ export const PeopleFilters = ({
         <ControlsDivider />
 
         <InlineLabel>Group:</InlineLabel>
-        <Select
+        <Dropdown
           value={filters.groupBy}
           onChange={(e) => onSetGroupBy(e.target.value as GroupBy)}
           aria-label="Group by"
@@ -202,7 +183,7 @@ export const PeopleFilters = ({
               {o.label}
             </option>
           ))}
-        </Select>
+        </Dropdown>
 
         <ControlsDivider />
         <SavedFiltersMenu

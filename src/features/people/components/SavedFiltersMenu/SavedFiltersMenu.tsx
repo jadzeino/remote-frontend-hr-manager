@@ -16,18 +16,25 @@ const TriggerBtn = styled.button<{ $hasItems: boolean }>`
   gap: 6px;
   height: 34px;
   padding: 0 12px;
-  border: 1px solid ${({ $hasItems }) => ($hasItems ? 'var(--colors-brand)' : 'var(--colors-gray-400)')};
-  border-radius: 8px;
+  border: 1px solid ${({ $hasItems }) => ($hasItems ? 'var(--colors-brand)' : 'var(--colors-gray-500, #697786)')};
+  border-radius: 9999px;
   background: ${({ $hasItems }) => ($hasItems ? '#f0eeff' : 'var(--colors-blank)')};
-  color: ${({ $hasItems }) => ($hasItems ? 'var(--colors-brand)' : 'var(--colors-gray-600)')};
+  color: ${({ $hasItems }) => ($hasItems ? 'var(--colors-brand)' : 'var(--colors-gray-700)')};
   font-size: 1.3rem;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
 
   &:hover:not(:disabled) {
-    border-color: var(--colors-brand);
-    color: var(--colors-brand);
+    border-color: #7f5af8;
+    background-color: #f5f3ff;
+    color: #7f5af8;
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: #7f5af8;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #6638ef;
   }
 
   &:disabled {
@@ -302,7 +309,7 @@ export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApp
         ) : (
           <FilterList>
             {savedFilters.map((sf) => (
-              <FilterItem key={sf.id} onClick={() => { onApply({ ...sf.filters, groupBy: sf.filters.groupBy ?? 'none' }); setOpen(false); }}>
+              <FilterItem key={sf.id} onClick={() => { onApply({ search: sf.filters.search ?? '', status: sf.filters.status ?? [], country: sf.filters.country ?? '', role: sf.filters.role ?? '', groupBy: sf.filters.groupBy ?? 'none' }); setOpen(false); }}>
                 <FilterName title={sf.name}>{sf.name}</FilterName>
                 <DeleteBtn
                   type="button"

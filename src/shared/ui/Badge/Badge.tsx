@@ -2,32 +2,29 @@ import styled from 'styled-components';
 
 type Status = 'active' | 'onboarding' | 'offboarded';
 
-const STATUS_COLORS: Record<Status, { dot: string; bg: string; text: string }> = {
-  active: { dot: '#12B76A', bg: '#ECFDF3', text: '#027A48' },
-  onboarding: { dot: '#9B8FEF', bg: '#F0EEFF', text: '#5B4FD4' },
-  offboarded: { dot: '#98A2B3', bg: '#F2F4F7', text: '#667085' },
+const STATUS_COLORS: Record<Status, { dotDark: string; dotLight: string; bg: string; text: string }> = {
+  active:     { dotDark: 'var(--Green-Light-700, #58A30D)', dotLight: 'var(--Green-Light-500, #8DE13A)', bg: '#ECFDF3', text: '#027A48' },
+  onboarding: { dotDark: '#6941C6', dotLight: '#D9D6FE', bg: '#F0EEFF', text: '#5B4FD4' },
+  offboarded: { dotDark: 'var(--Grey-600, #4B5865)', dotLight: 'var(--Grey-400, #9AA6B2)', bg: '#F2F4F7', text: '#667085' },
 };
 
-const Dot = styled.span<{ $color: string }>`
-  width: 6px;
-  height: 6px;
+const Dot = styled.span<{ $dark: string; $light: string }>`
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background-color: ${({ $color }) => $color};
+  background: linear-gradient(90deg, ${({ $dark }) => $dark} 50%, ${({ $light }) => $light} 50%);
   flex-shrink: 0;
 `;
 
-const Wrapper = styled.span<{ $bg: string; $text: string }>`
+const Wrapper = styled.span`
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 2px 8px;
-  border-radius: 16px;
-  background-color: ${({ $bg }) => $bg};
-  color: ${({ $text }) => $text};
   font-size: 1.2rem;
   font-weight: 500;
   line-height: 1.8;
   white-space: nowrap;
+  color: var(--colors-gray-700);
 `;
 
 type Props = {
@@ -35,12 +32,12 @@ type Props = {
 };
 
 export const Badge = ({ status }: Props) => {
-  const { dot, bg, text } = STATUS_COLORS[status] ?? STATUS_COLORS.offboarded;
+  const { dotDark, dotLight } = STATUS_COLORS[status] ?? STATUS_COLORS.offboarded;
   const label = status.charAt(0).toUpperCase() + status.slice(1);
 
   return (
-    <Wrapper $bg={bg} $text={text} aria-label={`Status: ${label}`}>
-      <Dot $color={dot} aria-hidden="true" />
+    <Wrapper aria-label={`Status: ${label}`}>
+      <Dot $dark={dotDark} $light={dotLight} aria-hidden="true" />
       {label}
     </Wrapper>
   );
