@@ -5,7 +5,7 @@ import {
   createGlobalStyle,
 } from 'styled-components';
 import { normalize } from 'styled-normalize';
-import { themeColor } from './color';
+import { themeColor, darkThemeColor } from './color';
 import './fonts/styles.css';
 import { themeTypography } from './typography';
 
@@ -25,6 +25,8 @@ const GlobalStyle = createGlobalStyle`
     --z-index-table-head: 2;
     --z-index-table-row: 1;
   }
+
+  ${darkThemeColor}
 
   html {
     font-size: 62.5%; /* 1rem = 10px */

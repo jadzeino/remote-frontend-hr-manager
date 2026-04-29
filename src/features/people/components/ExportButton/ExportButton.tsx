@@ -2,35 +2,33 @@ import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { ExportFormat } from '../../utils/exportData';
 
-const Wrapper = styled.div`
-  position: relative;
-  display: inline-flex;
-`;
-
 const MainBtn = styled.button`
   display: inline-flex;
   align-items: center;
-  height: 44px;
-  padding: 0 16px;
-  border: 1.5px solid var(--colors-gray-300);
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--colors-gray-500, #697786);
   border-right: none;
-  border-radius: 24px 0 0 24px;
+  border-radius: 9999px 0 0 9999px;
   background: var(--colors-blank);
   color: var(--colors-gray-700);
   font-size: ${({ theme }) => theme.typography.size.sm};
+  font-family: inherit;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s ease, border-color 0.15s ease;
-
-  &:hover:not(:disabled) {
-    background: var(--colors-gray-100);
-    border-color: var(--colors-gray);
-  }
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.45;
     cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #6638ef;
+    border-color: #7f5af8;
+    z-index: 1;
   }
 `;
 
@@ -38,29 +36,43 @@ const ChevronBtn = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 44px;
-  border: 1.5px solid var(--colors-gray-300);
-  border-radius: 0 24px 24px 0;
+  width: 30px;
+  height: 34px;
+  border: 1px solid var(--colors-gray-500, #697786);
+  border-radius: 0 9999px 9999px 0;
   background: var(--colors-blank);
   color: var(--colors-gray-500);
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
-
-  &:hover:not(:disabled) {
-    background: var(--colors-gray-100);
-    border-color: var(--colors-gray);
-  }
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.45;
     cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #6638ef;
+    border-color: #7f5af8;
+    z-index: 1;
   }
 
   svg {
     width: 12px;
     height: 12px;
     transition: transform 0.15s ease;
+  }
+`;
+
+const Wrapper = styled.div`
+  position: relative;
+  display: inline-flex;
+
+  &:hover ${MainBtn}:not(:disabled),
+  &:hover ${ChevronBtn}:not(:disabled) {
+    border-color: #7f5af8;
+    background-color: #f5f3ff;
+    color: #7f5af8;
   }
 `;
 
