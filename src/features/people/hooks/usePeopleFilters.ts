@@ -41,7 +41,7 @@ export function usePeopleFilters(): {
   };
 
   const update = useCallback(
-    (updates: Record<string, string>) => {
+    (updates: Record<string, string>, replace = false) => {
       setParams(
         (prev) => {
           const next = new URLSearchParams(prev);
@@ -54,7 +54,7 @@ export function usePeopleFilters(): {
           }
           return next;
         },
-        { replace: true }
+        { replace }
       );
     },
     [setParams]
@@ -87,12 +87,12 @@ export function usePeopleFilters(): {
   );
 
   const setPage = useCallback(
-    (page: number) => update({ page: String(page) }),
+    (page: number) => update({ page: String(page) }, true),
     [update]
   );
 
   const setLimit = useCallback(
-    (limit: number) => update({ limit: String(limit), page: '1' }),
+    (limit: number) => update({ limit: String(limit), page: '1' }, true),
     [update]
   );
 
