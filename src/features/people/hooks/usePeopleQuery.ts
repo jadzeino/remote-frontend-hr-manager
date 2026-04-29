@@ -12,6 +12,9 @@ function filtersToQuery(filters: PeopleFiltersState): PeopleQuery {
     role: filters.role || undefined,
     sortBy: filters.sortBy || undefined,
     order: filters.order === 'none' ? undefined : filters.order,
+    salaryMin: filters.salaryMin > 0 ? filters.salaryMin : undefined,
+    salaryMax: filters.salaryMax > 0 ? filters.salaryMax : undefined,
+    salaryCurrency: filters.salaryCurrency || undefined,
   };
 }
 
