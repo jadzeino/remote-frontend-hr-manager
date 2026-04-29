@@ -1,9 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import styled from 'styled-components';
-import { Button } from '@/ui-kit/button';
 import { FilterChip } from '@/shared/ui/FilterChip/FilterChip';
 import { useSavedFilters } from '../../hooks/useSavedFilters';
 import { PeopleFiltersState, GroupBy } from '../../types';
+import { SavedFiltersMenu } from '../SavedFiltersMenu/SavedFiltersMenu';
 
 // Single compact row: [Country] [Type] | Group:[select] | [saved chips] [+Save] [Clear all]
 const ControlsBar = styled.div`
@@ -76,37 +76,6 @@ const ClearButton = styled.button`
   }
 `;
 
-const SavedFilterChip = styled.button<{ $active?: boolean }>`
-  padding: 3px 10px;
-  border: 1px solid ${({ $active }) =>
-    $active ? 'var(--colors-brand)' : 'var(--colors-gray-300)'};
-  border-radius: 16px;
-  background: ${({ $active }) => ($active ? '#f0eeff' : 'var(--colors-blank)')};
-  color: ${({ $active }) =>
-    $active ? 'var(--colors-brand)' : 'var(--colors-gray-600)'};
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: all 0.15s;
-
-  &:hover:not(:disabled) {
-    border-color: var(--colors-brand);
-    color: var(--colors-brand);
-  }
-
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-`;
-
-const SaveInput = styled.input`
-  height: 30px;
-  padding: 0 8px;
-  border: 1px solid var(--colors-gray-400);
-  border-radius: 6px;
-  font-size: 1.3rem;
-  width: 140px;
-`;
 
 const GROUP_OPTIONS: { value: GroupBy; label: string }[] = [
   { value: 'none',     label: 'No grouping' },
@@ -140,8 +109,6 @@ export const PeopleFilters = ({
   onLoadFilter,
 }: Props) => {
   const { savedFilters, saveCurrentFilters, deleteFilter } = useSavedFilters();
-  const [saveName, setSaveName] = useState('');
-  const [showSaveInput, setShowSaveInput] = useState(false);
 
   const hasActiveFilters =
     filters.status.length > 0 ||
@@ -149,12 +116,10 @@ export const PeopleFilters = ({
     Boolean(filters.role) ||
     Boolean(filters.search);
 
-  const handleSave = useCallback(() => {
-    if (!saveName.trim()) return;
-    saveCurrentFilters(saveName.trim(), filters);
-    setSaveName('');
-    setShowSaveInput(false);
-  }, [saveName, saveCurrentFilters, filters]);
+  const handleSave = useCallback(
+    (name: string) => saveCurrentFilters(name, filters),
+    [saveCurrentFilters, filters]
+  );
 
   return (
     <>
@@ -201,65 +166,14 @@ export const PeopleFilters = ({
           ))}
         </Select>
 
-        {(savedFilters.length > 0 || true) && (
-          <>
-            <ControlsDivider />
-            {savedFilters.map((sf) => (
-              <SavedFilterChip
-                key={sf.id}
-                type="button"
-                onClick={() => onLoadFilter(sf.filters)}
-                title={`Load filter: ${sf.name}`}
-                disabled={isFetching}
-              >
-                {sf.name}
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isFetching) deleteFilter(sf.id);
-                  }}
-                  style={{ marginLeft: 6, opacity: 0.6 }}
-                  title="Delete saved filter"
-                >
-                  ×
-                </span>
-              </SavedFilterChip>
-            ))}
-
-            {showSaveInput ? (
-              <>
-                <SaveInput
-                  value={saveName}
-                  onChange={(e) => setSaveName(e.target.value)}
-                  placeholder="Filter name..."
-                  onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-                  autoFocus
-                  aria-label="Saved filter name"
-                  disabled={isFetching}
-                />
-                <Button
-                  onClick={handleSave}
-                  disabled={isFetching}
-                  style={{ minHeight: 30, padding: '4px 12px', fontSize: '1.2rem' }}
-                >
-                  Save
-                </Button>
-                <ClearButton type="button" onClick={() => setShowSaveInput(false)} disabled={isFetching}>
-                  Cancel
-                </ClearButton>
-              </>
-            ) : (
-              <SavedFilterChip
-                type="button"
-                onClick={() => setShowSaveInput(true)}
-                title="Save current filters"
-                disabled={isFetching}
-              >
-                + Save
-              </SavedFilterChip>
-            )}
-          </>
-        )}
+        <ControlsDivider />
+        <SavedFiltersMenu
+          savedFilters={savedFilters}
+          disabled={isFetching}
+          onApply={onLoadFilter}
+          onDelete={deleteFilter}
+          onSave={handleSave}
+        />
 
         {hasActiveFilters && (
           <ClearButton type="button" onClick={onClearAll} disabled={isFetching}>
