@@ -16,6 +16,7 @@ export function usePeopleFilters(): {
   filters: PeopleFiltersState;
   setSearch: (v: string) => void;
   toggleStatus: (status: string) => void;
+  setStatus: (statuses: string[]) => void;
   setCountry: (v: string) => void;
   setRole: (v: string) => void;
   setPage: (page: number) => void;
@@ -79,6 +80,11 @@ export function usePeopleFilters(): {
       update({ status: next.join(','), page: '1' });
     },
     [params, update]
+  );
+
+  const setStatus = useCallback(
+    (statuses: string[]) => update({ status: statuses.join(','), page: '1' }),
+    [update]
   );
 
   const setCountry = useCallback(
@@ -159,6 +165,7 @@ export function usePeopleFilters(): {
     filters,
     setSearch,
     toggleStatus,
+    setStatus,
     setCountry,
     setRole,
     setPage,

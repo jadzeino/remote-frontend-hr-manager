@@ -78,6 +78,7 @@ export const PeoplePage = () => {
     filters,
     setSearch,
     toggleStatus,
+    setStatus,
     setCountry,
     setRole,
     setPage,
@@ -136,16 +137,13 @@ export const PeoplePage = () => {
   const handleLoadFilter = useCallback(
     (f: { search?: string; status?: string[]; country?: string; role?: string; groupBy?: GroupBy }) => {
       if (f.search !== undefined) { setSearchInput(f.search); setSearch(f.search); }
-      if (f.status !== undefined) {
-        f.status.forEach((s) => { if (!filters.status.includes(s)) toggleStatus(s); });
-        filters.status.forEach((s) => { if (!f.status!.includes(s)) toggleStatus(s); });
-      }
+      if (f.status !== undefined) setStatus(f.status);
       if (f.country !== undefined) setCountry(f.country ?? '');
       if (f.role !== undefined) setRole(f.role ?? '');
       if (f.groupBy !== undefined) setGroupBy(f.groupBy);
       else setGroupBy('none');
     },
-    [filters.status, setSearch, setCountry, setRole, setGroupBy, toggleStatus]
+    [setSearch, setStatus, setCountry, setRole, setGroupBy]
   );
 
   const handleClearAll = useCallback(() => {
