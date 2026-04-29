@@ -169,6 +169,12 @@ export const PeopleFilters = ({
         <ControlsDivider />
         <SavedFiltersMenu
           savedFilters={savedFilters}
+          currentFilters={{
+            search: filters.search || undefined,
+            status: filters.status.length > 0 ? filters.status : undefined,
+            country: filters.country || undefined,
+            role: filters.role || undefined,
+          }}
           disabled={isFetching}
           onApply={onLoadFilter}
           onDelete={deleteFilter}

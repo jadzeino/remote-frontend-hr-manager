@@ -217,6 +217,17 @@ const CharCount = styled.p<{ $warn: boolean }>`
   text-align: right;
 `;
 
+type CurrentFilters = SavedFilter['filters'];
+
+function filtersMatch(a: CurrentFilters, b: CurrentFilters): boolean {
+  if ((a.search ?? '') !== (b.search ?? '')) return false;
+  if ((a.country ?? '') !== (b.country ?? '')) return false;
+  if ((a.role ?? '') !== (b.role ?? '')) return false;
+  const aStatus = [...(a.status ?? [])].sort().join(',');
+  const bStatus = [...(b.status ?? [])].sort().join(',');
+  return aStatus === bStatus;
+}
+
 function formatMeta(f: SavedFilter): string {
   const parts: string[] = [];
   if (f.filters.status?.length) parts.push(f.filters.status.join(', '));
@@ -228,19 +239,22 @@ function formatMeta(f: SavedFilter): string {
 
 type Props = {
   savedFilters: SavedFilter[];
+  currentFilters: CurrentFilters;
   disabled?: boolean;
   onApply: (f: SavedFilter['filters']) => void;
   onDelete: (id: string) => void;
   onSave: (name: string) => void;
 };
 
-export const SavedFiltersMenu = ({ savedFilters, disabled, onApply, onDelete, onSave }: Props) => {
+export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApply, onDelete, onSave }: Props) => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const atLimit = savedFilters.length >= MAX_FILTERS;
+  const activeFilter = savedFilters.find((sf) => filtersMatch(sf.filters, currentFilters)) ?? null;
+  const isDuplicate = activeFilter !== null;
 
   useEffect(() => {
     if (!open) return;
@@ -259,10 +273,10 @@ export const SavedFiltersMenu = ({ savedFilters, disabled, onApply, onDelete, on
 
   const handleSave = useCallback(() => {
     const trimmed = name.trim();
-    if (!trimmed || atLimit) return;
+    if (!trimmed || atLimit || isDuplicate) return;
     onSave(trimmed);
     setName('');
-  }, [name, atLimit, onSave]);
+  }, [name, atLimit, isDuplicate, onSave]);
 
   return (
     <Wrapper ref={wrapperRef}>
@@ -274,7 +288,7 @@ export const SavedFiltersMenu = ({ savedFilters, disabled, onApply, onDelete, on
         aria-haspopup="true"
         onClick={() => setOpen((o) => !o)}
       >
-        Saved filters
+        {activeFilter ? activeFilter.name : savedFilters.length === 0 ? 'No saved filters' : 'Saved filters'}
         {savedFilters.length > 0 && <Badge>{savedFilters.length}</Badge>}
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ transition: 'transform 0.15s', transform: open ? 'rotate(180deg)' : undefined }}>
           <polyline points="6 9 12 15 18 9" />
@@ -319,6 +333,10 @@ export const SavedFiltersMenu = ({ savedFilters, disabled, onApply, onDelete, on
             <strong>Maximum {MAX_FILTERS} saved filters reached.</strong>
             <br />
             Delete one to save a new filter.
+          </LimitMessage>
+        ) : isDuplicate ? (
+          <LimitMessage>
+            Already saved as <strong>{activeFilter!.name}</strong>.
           </LimitMessage>
         ) : (
           <SaveSection>
