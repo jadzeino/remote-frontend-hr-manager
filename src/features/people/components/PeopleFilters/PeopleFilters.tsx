@@ -94,7 +94,7 @@ type Props = {
   onSetRole: (role: string) => void;
   onSetGroupBy: (g: GroupBy) => void;
   onClearAll: () => void;
-  onLoadFilter: (f: { search?: string; status?: string[]; country?: string; role?: string }) => void;
+  onLoadFilter: (f: { search?: string; status?: string[]; country?: string; role?: string; groupBy?: GroupBy }) => void;
 };
 
 export const PeopleFilters = ({
@@ -174,6 +174,7 @@ export const PeopleFilters = ({
             status: filters.status.length > 0 ? filters.status : undefined,
             country: filters.country || undefined,
             role: filters.role || undefined,
+            groupBy: filters.groupBy !== 'none' ? filters.groupBy : undefined,
           }}
           disabled={isFetching}
           onApply={onLoadFilter}

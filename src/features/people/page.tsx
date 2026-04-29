@@ -165,7 +165,7 @@ export const PeoplePage = () => {
   );
 
   const handleLoadFilter = useCallback(
-    (f: { search?: string; status?: string[]; country?: string; role?: string }) => {
+    (f: { search?: string; status?: string[]; country?: string; role?: string; groupBy?: GroupBy }) => {
       if (f.search !== undefined) { setSearchInput(f.search); setSearch(f.search); }
       if (f.status !== undefined) {
         f.status.forEach((s) => { if (!filters.status.includes(s)) toggleStatus(s); });
@@ -173,8 +173,10 @@ export const PeoplePage = () => {
       }
       if (f.country !== undefined) setCountry(f.country ?? '');
       if (f.role !== undefined) setRole(f.role ?? '');
+      if (f.groupBy !== undefined) setGroupBy(f.groupBy);
+      else setGroupBy('none');
     },
-    [filters.status, setSearch, setCountry, setRole, toggleStatus]
+    [filters.status, setSearch, setCountry, setRole, setGroupBy, toggleStatus]
   );
 
   const handleClearAll = useCallback(() => {

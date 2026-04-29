@@ -23,6 +23,7 @@ export function useSavedFilters() {
             status: filters.status.length > 0 ? filters.status : undefined,
             country: filters.country || undefined,
             role: filters.role || undefined,
+            groupBy: filters.groupBy !== 'none' ? filters.groupBy : undefined,
           },
           savedAt: new Date().toISOString(),
         };

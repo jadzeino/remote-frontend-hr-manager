@@ -223,6 +223,7 @@ function filtersMatch(a: CurrentFilters, b: CurrentFilters): boolean {
   if ((a.search ?? '') !== (b.search ?? '')) return false;
   if ((a.country ?? '') !== (b.country ?? '')) return false;
   if ((a.role ?? '') !== (b.role ?? '')) return false;
+  if ((a.groupBy ?? 'none') !== (b.groupBy ?? 'none')) return false;
   const aStatus = [...(a.status ?? [])].sort().join(',');
   const bStatus = [...(b.status ?? [])].sort().join(',');
   return aStatus === bStatus;
@@ -233,6 +234,7 @@ function formatMeta(f: SavedFilter): string {
   if (f.filters.status?.length) parts.push(f.filters.status.join(', '));
   if (f.filters.country) parts.push(f.filters.country);
   if (f.filters.role) parts.push(f.filters.role);
+  if (f.filters.groupBy) parts.push(`grouped by ${f.filters.groupBy}`);
   if (f.filters.search) parts.push(`"${f.filters.search}"`);
   return parts.join(' · ') || 'No filters';
 }

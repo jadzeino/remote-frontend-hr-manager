@@ -36,6 +36,7 @@ export type SavedFilter = {
     status?: string[];
     country?: string;
     role?: string;
+    groupBy?: GroupBy;
   };
   savedAt: string;
 };
