@@ -1,6 +1,6 @@
-const UNSAFE_CHARS = /[<>'"`;]/g;
-const MAX_LENGTH = 100;
+const UNSAFE_CHARS = /[<>'"`;\n\r]/g;
+const DEFAULT_MAX_LENGTH = 200;
 
-export function sanitizeInput(value: string): string {
-  return value.trim().replace(UNSAFE_CHARS, '').slice(0, MAX_LENGTH);
+export function sanitizeInput(value: string, maxLength = DEFAULT_MAX_LENGTH): string {
+  return value.trim().replace(UNSAFE_CHARS, '').slice(0, maxLength);
 }

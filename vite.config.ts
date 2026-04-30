@@ -11,5 +11,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup',
     exclude: ['**/node_modules/**', '**/e2e/**'],
+    coverage: {
+      provider: 'v8',
+      thresholds: { statements: 60, branches: 50, functions: 60 },
+      exclude: ['src/test/**', '**/*.stories.*', 'src/theme/**', 'src/app/**', 'src/pages/**'],
+    },
   },
 });

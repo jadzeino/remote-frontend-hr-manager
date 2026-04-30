@@ -10,7 +10,8 @@ function applyScheme(scheme: ColorScheme) {
 }
 
 function getInitial(): ColorScheme {
-  const stored = localStorage.getItem(STORAGE_KEY) as ColorScheme | null;
+  let stored: string | null = null;
+  try { stored = localStorage.getItem(STORAGE_KEY); } catch { /* private mode */ }
   const resolved =
     stored === 'light' || stored === 'dark'
       ? stored
@@ -27,7 +28,7 @@ export function useColorScheme() {
 
   useEffect(() => {
     applyScheme(scheme);
-    localStorage.setItem(STORAGE_KEY, scheme);
+    try { localStorage.setItem(STORAGE_KEY, scheme); } catch { /* quota exceeded or private mode */ }
   }, [scheme]);
 
   const toggle = () => setScheme(s => (s === 'light' ? 'dark' : 'light'));

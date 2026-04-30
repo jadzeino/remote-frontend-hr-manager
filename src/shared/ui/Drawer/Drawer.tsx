@@ -1,5 +1,6 @@
-import { ReactNode, useEffect, KeyboardEvent } from 'react';
+import { ReactNode, useEffect, useRef, KeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
+import { trapFocus } from '@/shared/utils/trapFocus';
 import styled, { css } from 'styled-components';
 
 const Backdrop = styled.div<{ $isOpen: boolean }>`
@@ -89,9 +90,12 @@ type Props = {
 };
 
 export const Drawer = ({ isOpen, onClose, title, children }: Props) => {
+  const panelRef = useRef<HTMLElement>(null);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      panelRef.current?.focus();
     }
     return () => {
       document.body.style.overflow = '';
@@ -99,17 +103,20 @@ export const Drawer = ({ isOpen, onClose, title, children }: Props) => {
   }, [isOpen]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLElement>) => {
-    if (e.key === 'Escape') onClose();
+    if (e.key === 'Escape') { onClose(); return; }
+    if (panelRef.current) trapFocus(panelRef.current, e.nativeEvent);
   };
 
   return createPortal(
     <>
       <Backdrop $isOpen={isOpen} onClick={onClose} role="presentation" />
       <Panel
+        ref={panelRef}
         $isOpen={isOpen}
         role="dialog"
         aria-modal="true"
         aria-labelledby="drawer-title"
+        tabIndex={-1}
         onKeyDown={handleKeyDown}
       >
         <Header>

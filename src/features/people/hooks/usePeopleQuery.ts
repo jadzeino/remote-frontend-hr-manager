@@ -27,7 +27,7 @@ export function usePeopleQuery(filters: PeopleFiltersState) {
 
   return useQuery<PeopleResponse>({
     queryKey: peopleQueryKey(query),
-    queryFn: () => fetchPeople(query),
+    queryFn: ({ signal }) => fetchPeople(query, signal),
     placeholderData: keepPreviousData,
     staleTime: 30_000,
     gcTime: 5 * 60_000,

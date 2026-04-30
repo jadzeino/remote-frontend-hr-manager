@@ -39,11 +39,11 @@ export function buildQueryParams(query: PeopleQuery): URLSearchParams {
   return params;
 }
 
-export async function fetchPeople(query: PeopleQuery): Promise<PeopleResponse> {
+export async function fetchPeople(query: PeopleQuery, signal?: AbortSignal): Promise<PeopleResponse> {
   const params = buildQueryParams(query);
   const url = `${BASE_URL}/people?${params.toString()}`;
 
-  const response = await fetch(url, { method: 'GET' });
+  const response = await fetch(url, { signal });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch people: ${response.status} ${response.statusText}`);

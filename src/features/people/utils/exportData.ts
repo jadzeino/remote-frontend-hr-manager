@@ -17,10 +17,12 @@ function toRow(p: Person) {
 }
 
 function escapeCsv(value: string): string {
-  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-    return `"${value.replace(/"/g, '""')}"`;
+  // Prefix formula-trigger chars so Excel/Sheets won't execute them as formulas
+  const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  if (safe.includes(',') || safe.includes('"') || safe.includes('\n')) {
+    return `"${safe.replace(/"/g, '""')}"`;
   }
-  return value;
+  return safe;
 }
 
 function triggerDownload(blob: Blob, filename: string) {

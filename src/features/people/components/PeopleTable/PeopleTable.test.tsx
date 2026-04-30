@@ -43,7 +43,7 @@ describe('PeoplePage', () => {
 
   it('shows Add member button', () => {
     render(<TestProviders><PeoplePage /></TestProviders>);
-    expect(screen.getByText('+ Add member')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /add member/i })).toBeInTheDocument();
   });
 
   it('renders skeleton rows while loading', () => {
@@ -87,7 +87,7 @@ describe('PeoplePage', () => {
 
   it('opens Add member modal when button is clicked', async () => {
     render(<TestProviders><PeoplePage /></TestProviders>);
-    await userEvent.click(screen.getByText('+ Add member'));
+    await userEvent.click(screen.getByRole('button', { name: /add member/i }));
     // Modal has aria-labelledby="modal-title" with text "Add member"
     expect(screen.getByRole('dialog', { name: 'Add member' })).toBeInTheDocument();
   });

@@ -47,6 +47,17 @@ export type SavedFilter = {
   savedAt: string;
 };
 
+export type LoadFilterPayload = {
+  search?: string;
+  status?: string[];
+  country?: string;
+  role?: string;
+  groupBy?: GroupBy;
+  salaryMin?: number;
+  salaryMax?: number;
+  salaryCurrency?: string;
+};
+
 export type PeopleFiltersState = {
   search: string;
   status: string[];

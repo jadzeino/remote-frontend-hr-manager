@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { fetchPeople } from '../services/peopleApi';
 import { PeopleFiltersState, PeopleQuery, PeopleResponse } from '../types';
 
@@ -22,8 +22,8 @@ export function usePeopleInfinite(filters: PeopleFiltersState) {
 
   return useInfiniteQuery<PeopleResponse>({
     queryKey: ['people-infinite', baseQuery],
-    queryFn: ({ pageParam }) =>
-      fetchPeople({ ...baseQuery, page: pageParam as number }),
+    queryFn: ({ pageParam, signal }) =>
+      fetchPeople({ ...baseQuery, page: pageParam as number }, signal),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       if (lastPage.page < lastPage.totalPages) {
@@ -31,6 +31,7 @@ export function usePeopleInfinite(filters: PeopleFiltersState) {
       }
       return undefined;
     },
+    placeholderData: keepPreviousData,
     staleTime: 30_000,
     gcTime: 5 * 60_000,
     retry: 2,

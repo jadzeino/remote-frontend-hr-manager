@@ -13,7 +13,7 @@ import { AnalyticsBar } from './components/AnalyticsBar/AnalyticsBar';
 import { AddMemberModal } from './components/AddMemberModal/AddMemberModal';
 import { PersonDrawer } from './components/PersonDrawer/PersonDrawer';
 import { COUNTRIES } from './constants';
-import { Person, GroupBy, ViewMode } from './types';
+import { Person, GroupBy, ViewMode, LoadFilterPayload } from './types';
 import { exportAllPeople } from './services/peopleApi';
 import { exportPeople, ExportFormat } from './utils/exportData';
 
@@ -140,10 +140,8 @@ export const PeoplePage = () => {
   );
 
   const handleLoadFilter = useCallback(
-    (f: { search?: string; status?: string[]; country?: string; role?: string; groupBy?: GroupBy }) => {
-      // Sync the local search input state
+    (f: LoadFilterPayload) => {
       if (f.search !== undefined) setSearchInput(f.search);
-      // Apply all URL params in one atomic navigate call
       loadFilter(f);
     },
     [loadFilter]

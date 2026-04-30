@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { DisclosureButton } from '@/ui-kit/disclosure-button';
 import { DisclosurePanel } from '@/ui-kit/disclosure-panel';
 import { SavedFilter } from '../../types';
+import { sanitizeInput } from '../../utils/sanitize';
 
 const MAX_FILTERS = 5;
 const MAX_NAME_LENGTH = 30;
@@ -52,16 +53,17 @@ const FilterList = styled.ul`
   overflow-y: auto;
 `;
 
-const FilterItem = styled.li`
+const FilterItem = styled.li<{ $active?: boolean }>`
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
   cursor: pointer;
   transition: background 0.1s ease;
+  background: ${({ $active }) => ($active ? 'var(--colors-brand-subtle)' : 'transparent')};
 
   &:hover {
-    background: var(--colors-gray-100);
+    background: ${({ $active }) => ($active ? 'var(--colors-brand-subtle)' : 'var(--colors-gray-100)')};
   }
 `;
 
@@ -74,6 +76,13 @@ const FilterName = styled.span`
   white-space: nowrap;
 `;
 
+const ActiveDot = styled.span`
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--colors-brand);
+  flex-shrink: 0;
+`;
 
 const DeleteBtn = styled.button`
   display: flex;
@@ -187,6 +196,25 @@ const CharCount = styled.p<{ $warn: boolean }>`
   text-align: right;
 `;
 
+const ResetBtn = styled.button`
+  display: block;
+  width: calc(100% - 28px);
+  margin: 6px 14px 10px;
+  height: 30px;
+  border: 1px solid var(--colors-gray-200);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--colors-gray-500);
+  font-size: ${({ theme }) => theme.typography.size.xs};
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+
+  &:hover {
+    border-color: var(--colors-gray-400);
+    color: var(--colors-gray-700);
+  }
+`;
+
 type CurrentFilters = SavedFilter['filters'];
 
 function filtersMatch(a: CurrentFilters, b: CurrentFilters): boolean {
@@ -202,17 +230,27 @@ function filtersMatch(a: CurrentFilters, b: CurrentFilters): boolean {
   return aStatus === bStatus;
 }
 
-
 type Props = {
   savedFilters: SavedFilter[];
   currentFilters: CurrentFilters;
+  hasActiveFilters: boolean;
   disabled?: boolean;
-  onApply: (f: SavedFilter['filters']) => void;
+  onApply: (f: SavedFilter['filters'] & { salaryMin?: number; salaryMax?: number; salaryCurrency?: string }) => void;
   onDelete: (id: string) => void;
   onSave: (name: string) => void;
+  onReset: () => void;
 };
 
-export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApply, onDelete, onSave }: Props) => {
+export const SavedFiltersMenu = ({
+  savedFilters,
+  currentFilters,
+  hasActiveFilters,
+  disabled,
+  onApply,
+  onDelete,
+  onSave,
+  onReset,
+}: Props) => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -221,8 +259,10 @@ export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApp
   const atLimit = savedFilters.length >= MAX_FILTERS;
   const activeFilter = savedFilters.find((sf) => filtersMatch(sf.filters, currentFilters)) ?? null;
   const isDuplicate = activeFilter !== null;
-  const isDuplicateName = name.trim().length > 0 &&
-    savedFilters.some((sf) => sf.name.toLowerCase() === name.trim().toLowerCase());
+  const safeName = sanitizeInput(name, MAX_NAME_LENGTH);
+  const isDuplicateName =
+    safeName.length > 0 &&
+    savedFilters.some((sf) => sf.name.toLowerCase() === safeName.toLowerCase());
 
   useEffect(() => {
     if (!open) return;
@@ -236,15 +276,36 @@ export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApp
   }, [open]);
 
   useEffect(() => {
-    if (open && !atLimit) inputRef.current?.focus();
-  }, [open, atLimit]);
+    if (open && !atLimit && hasActiveFilters && !isDuplicate) inputRef.current?.focus();
+  }, [open, atLimit, hasActiveFilters, isDuplicate]);
 
   const handleSave = useCallback(() => {
-    const trimmed = name.trim();
-    if (!trimmed || atLimit || isDuplicate || isDuplicateName) return;
-    onSave(trimmed);
+    const safe = sanitizeInput(name, MAX_NAME_LENGTH);
+    if (!safe || atLimit || isDuplicate || isDuplicateName || !hasActiveFilters) return;
+    onSave(safe);
     setName('');
-  }, [name, atLimit, isDuplicate, isDuplicateName, onSave]);
+  }, [name, atLimit, isDuplicate, isDuplicateName, hasActiveFilters, onSave]);
+
+  const handleReset = () => {
+    onReset();
+    setOpen(false);
+  };
+
+  const handleApply = (sf: SavedFilter) => {
+    onApply({
+      search: sf.filters.search ?? '',
+      status: sf.filters.status ?? [],
+      country: sf.filters.country ?? '',
+      role: sf.filters.role ?? '',
+      groupBy: sf.filters.groupBy ?? 'none',
+      salaryMin: sf.filters.salaryMin ?? 0,
+      salaryMax: sf.filters.salaryMax ?? 0,
+      salaryCurrency: sf.filters.salaryCurrency ?? '',
+    });
+    setOpen(false);
+  };
+
+  const triggerLabel = activeFilter ? activeFilter.name : 'Saved filters';
 
   return (
     <Wrapper ref={wrapperRef}>
@@ -256,9 +317,17 @@ export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApp
         aria-haspopup="true"
         onClick={() => setOpen((o) => !o)}
       >
-        {activeFilter ? activeFilter.name : savedFilters.length === 0 ? 'No saved filters' : 'Saved filters'}
+        {triggerLabel}
         {savedFilters.length > 0 && <Badge>{savedFilters.length}</Badge>}
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ transition: 'transform 0.15s', transform: open ? 'rotate(180deg)' : undefined }}>
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          style={{ transition: 'transform 0.15s', transform: open ? 'rotate(180deg)' : undefined }}
+        >
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </TriggerBtn>
@@ -270,24 +339,28 @@ export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApp
           <EmptyState>No saved filters yet.</EmptyState>
         ) : (
           <FilterList>
-            {savedFilters.map((sf) => (
-              <FilterItem key={sf.id} onClick={() => { onApply({ search: sf.filters.search ?? '', status: sf.filters.status ?? [], country: sf.filters.country ?? '', role: sf.filters.role ?? '', groupBy: sf.filters.groupBy ?? 'none' }); setOpen(false); }}>
-                <FilterName title={sf.name}>{sf.name}</FilterName>
-                <DeleteBtn
-                  type="button"
-                  title="Delete saved filter"
-                  aria-label={`Delete ${sf.name}`}
-                  onClick={(e) => { e.stopPropagation(); onDelete(sf.id); }}
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6l-1 14H6L5 6" />
-                    <path d="M10 11v6M14 11v6" />
-                    <path d="M9 6V4h6v2" />
-                  </svg>
-                </DeleteBtn>
-              </FilterItem>
-            ))}
+            {savedFilters.map((sf) => {
+              const isActive = activeFilter?.id === sf.id;
+              return (
+                <FilterItem key={sf.id} $active={isActive} onClick={() => handleApply(sf)}>
+                  {isActive && <ActiveDot />}
+                  <FilterName title={sf.name}>{sf.name}</FilterName>
+                  <DeleteBtn
+                    type="button"
+                    title="Delete saved filter"
+                    aria-label={`Delete ${sf.name}`}
+                    onClick={(e) => { e.stopPropagation(); onDelete(sf.id); }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6l-1 14H6L5 6" />
+                      <path d="M10 11v6M14 11v6" />
+                      <path d="M9 6V4h6v2" />
+                    </svg>
+                  </DeleteBtn>
+                </FilterItem>
+              );
+            })}
           </FilterList>
         )}
 
@@ -295,13 +368,17 @@ export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApp
 
         {atLimit ? (
           <LimitMessage>
-            <strong>Maximum {MAX_FILTERS} saved filters reached.</strong>
+            <strong>Limit of {MAX_FILTERS} saved filters reached.</strong>
             <br />
             Delete one to save a new filter.
           </LimitMessage>
         ) : isDuplicate ? (
           <LimitMessage>
             Already saved as <strong>{activeFilter!.name}</strong>.
+          </LimitMessage>
+        ) : !hasActiveFilters ? (
+          <LimitMessage>
+            No filters active — apply filters first to save them.
           </LimitMessage>
         ) : (
           <SaveSection>
@@ -317,7 +394,11 @@ export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApp
                 aria-describedby={isDuplicateName ? 'name-error' : undefined}
                 maxLength={MAX_NAME_LENGTH}
               />
-              <SaveBtn type="button" onClick={handleSave} disabled={!name.trim() || isDuplicateName}>
+              <SaveBtn
+                type="button"
+                onClick={handleSave}
+                disabled={!safeName || isDuplicateName}
+              >
                 Save
               </SaveBtn>
             </InputRow>
@@ -331,6 +412,12 @@ export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApp
             )}
           </SaveSection>
         )}
+
+        <Divider />
+
+        <ResetBtn type="button" onClick={handleReset}>
+          Reset to defaults
+        </ResetBtn>
       </Panel>
     </Wrapper>
   );

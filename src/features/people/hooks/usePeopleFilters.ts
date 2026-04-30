@@ -1,8 +1,16 @@
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { sanitizeInput } from '../utils/sanitize';
-import { GroupBy, PeopleFiltersState, ViewMode } from '../types';
+import { GroupBy, LoadFilterPayload, PeopleFiltersState, ViewMode } from '../types';
 import { DEFAULT_LIMIT } from '../constants';
+
+const VALID_CURRENCIES = ['USD', 'EUR', 'GBP'] as const;
+const VALID_GROUP_BY: GroupBy[] = ['none', 'country', 'status', 'role', 'jobTitle'];
+const VALID_VIEW_MODES: ViewMode[] = ['pagination', 'infinite'];
+
+const safePage  = (n: number) => Number.isFinite(n) && n >= 1 ? n : 1;
+const safeLimit = (n: number) => Number.isFinite(n) && n >= 1 ? Math.min(n, 100) : DEFAULT_LIMIT;
+const safeNum   = (n: number) => Number.isFinite(n) && n >= 0 ? n : 0;
 
 function parseStatus(raw: string | null): string[] {
   if (!raw) return [];
@@ -17,7 +25,7 @@ export function usePeopleFilters(): {
   setSearch: (v: string) => void;
   toggleStatus: (status: string) => void;
   setStatus: (statuses: string[]) => void;
-  loadFilter: (f: { search?: string; status?: string[]; country?: string; role?: string; groupBy?: string }) => void;
+  loadFilter: (f: LoadFilterPayload) => void;
   setCountry: (v: string) => void;
   setRole: (v: string) => void;
   setPage: (page: number) => void;
@@ -31,20 +39,27 @@ export function usePeopleFilters(): {
 } {
   const [params, setParams] = useSearchParams();
 
+  const rawGroupBy = params.get('groupBy') ?? 'none';
+  const rawViewMode = params.get('viewMode') ?? 'pagination';
+  const rawCurrency = params.get('salaryCurrency') ?? '';
+  const rawOrder = params.get('order') ?? 'none';
+
   const filters: PeopleFiltersState = {
     search: params.get('search') ?? '',
     status: parseStatus(params.get('status')),
     country: params.get('country') ?? '',
     role: params.get('role') ?? '',
-    page: parseInt(params.get('page') ?? '1', 10),
-    limit: parseInt(params.get('limit') ?? String(DEFAULT_LIMIT), 10),
+    page: safePage(parseInt(params.get('page') ?? '1', 10)),
+    limit: safeLimit(parseInt(params.get('limit') ?? String(DEFAULT_LIMIT), 10)),
     sortBy: params.get('sortBy') ?? '',
-    order: (params.get('order') as PeopleFiltersState['order']) ?? 'none',
-    groupBy: (params.get('groupBy') as GroupBy) ?? 'none',
-    viewMode: (params.get('viewMode') as ViewMode) ?? 'pagination',
-    salaryMin: parseInt(params.get('salaryMin') ?? '0', 10),
-    salaryMax: parseInt(params.get('salaryMax') ?? '0', 10),
-    salaryCurrency: params.get('salaryCurrency') ?? '',
+    order: (['asc', 'desc', 'none'] as const).includes(rawOrder as 'asc' | 'desc' | 'none')
+      ? (rawOrder as PeopleFiltersState['order'])
+      : 'none',
+    groupBy: VALID_GROUP_BY.includes(rawGroupBy as GroupBy) ? (rawGroupBy as GroupBy) : 'none',
+    viewMode: VALID_VIEW_MODES.includes(rawViewMode as ViewMode) ? (rawViewMode as ViewMode) : 'pagination',
+    salaryMin: safeNum(parseInt(params.get('salaryMin') ?? '0', 10)),
+    salaryMax: safeNum(parseInt(params.get('salaryMax') ?? '0', 10)),
+    salaryCurrency: (VALID_CURRENCIES as readonly string[]).includes(rawCurrency) ? rawCurrency : '',
   };
 
   const update = useCallback(
@@ -68,7 +83,7 @@ export function usePeopleFilters(): {
   );
 
   const setSearch = useCallback(
-    (v: string) => update({ search: sanitizeInput(v), page: '1' }),
+    (v: string) => update({ search: sanitizeInput(v, 200), page: '1' }),
     [update]
   );
 
@@ -89,12 +104,11 @@ export function usePeopleFilters(): {
   );
 
   const loadFilter = useCallback(
-    (f: { search?: string; status?: string[]; country?: string; role?: string; groupBy?: string }) => {
+    (f: LoadFilterPayload) => {
       setParams((prev) => {
         const next = new URLSearchParams(prev);
-        // Apply all fields atomically in one navigation
         if (f.search !== undefined) {
-          if (f.search) next.set('search', sanitizeInput(f.search)); else next.delete('search');
+          if (f.search) next.set('search', sanitizeInput(f.search, 200)); else next.delete('search');
         }
         if (f.status !== undefined) {
           if (f.status.length) next.set('status', f.status.join(',')); else next.delete('status');
@@ -107,6 +121,15 @@ export function usePeopleFilters(): {
         }
         if (f.groupBy !== undefined) {
           if (f.groupBy && f.groupBy !== 'none') next.set('groupBy', f.groupBy); else next.delete('groupBy');
+        }
+        if (f.salaryMin !== undefined) {
+          if (f.salaryMin > 0) next.set('salaryMin', String(f.salaryMin)); else next.delete('salaryMin');
+        }
+        if (f.salaryMax !== undefined) {
+          if (f.salaryMax > 0) next.set('salaryMax', String(f.salaryMax)); else next.delete('salaryMax');
+        }
+        if (f.salaryCurrency !== undefined) {
+          if (f.salaryCurrency) next.set('salaryCurrency', f.salaryCurrency); else next.delete('salaryCurrency');
         }
         next.set('page', '1');
         return next;

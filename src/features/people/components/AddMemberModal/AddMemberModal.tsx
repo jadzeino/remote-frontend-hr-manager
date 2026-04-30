@@ -7,10 +7,17 @@ import { Modal } from '@/shared/ui/Modal/Modal';
 import { Button } from '@/ui-kit/button';
 import { createPerson } from '../../services/peopleApi';
 import { Person } from '../../types';
+import { sanitizeInput } from '../../utils/sanitize';
+
+// Validate that the sanitized (stripped) value meets the minimum length.
+// This prevents inputs like "<<" (2 raw chars → 0 chars after stripping) from bypassing min checks.
+const sanitizedMin = (min: number) => (v: string) => sanitizeInput(v, 100).length >= min;
 
 const schema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
-  jobTitle: z.string().min(1, 'Job title is required'),
+  name: z.string().max(100)
+    .refine(sanitizedMin(2), 'Name must be at least 2 characters'),
+  jobTitle: z.string().max(100)
+    .refine(sanitizedMin(1), 'Job title is required'),
   country: z.string().min(1, 'Country is required'),
   employment: z.enum(['employee', 'contractor'] as const),
   status: z.enum(['active', 'onboarding', 'offboarded'] as const),
@@ -168,22 +175,6 @@ export const AddMemberModal = ({ isOpen, onClose, countries }: Props) => {
       };
       return createPerson(person);
     },
-    onMutate: async (data) => {
-      // Optimistic update: cancel outgoing queries and insert new person at top
-      await queryClient.cancelQueries({ queryKey: ['people'] });
-      const tempPerson: Person = {
-        id: Date.now(),
-        name: data.name,
-        jobTitle: data.jobTitle,
-        country: data.country,
-        employment: data.employment,
-        status: data.status,
-        salary: Math.round(data.salary * 100),
-        currency: data.currency,
-        photo: '',
-      };
-      return { tempPerson };
-    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['people'] });
       queryClient.invalidateQueries({ queryKey: ['people-infinite'] });
@@ -195,7 +186,11 @@ export const AddMemberModal = ({ isOpen, onClose, countries }: Props) => {
     },
   });
 
-  const onSubmit = (data: FormData) => mutation.mutate(data);
+  const onSubmit = (data: FormData) => mutation.mutate({
+    ...data,
+    name: sanitizeInput(data.name, 100),
+    jobTitle: sanitizeInput(data.jobTitle, 100),
+  });
 
   const handleClose = () => {
     reset();

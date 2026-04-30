@@ -5,7 +5,7 @@ import { Checkbox } from '@/ui-kit/checkbox';
 import { Dropdown } from '@/ui-kit/dropdown';
 import { SearchInput } from '@/ui-kit/search-input';
 import { useSavedFilters } from '../../hooks/useSavedFilters';
-import { PeopleFiltersState, GroupBy } from '../../types';
+import { PeopleFiltersState, GroupBy, LoadFilterPayload } from '../../types';
 import { ExportButton } from '../ExportButton/ExportButton';
 import { ExportFormat } from '../../utils/exportData';
 import { SavedFiltersMenu } from '../SavedFiltersMenu/SavedFiltersMenu';
@@ -91,7 +91,7 @@ type Props = {
   onSetRole: (role: string) => void;
   onSetGroupBy: (g: GroupBy) => void;
   onClearAll: () => void;
-  onLoadFilter: (f: { search?: string; status?: string[]; country?: string; role?: string; groupBy?: GroupBy }) => void;
+  onLoadFilter: (f: LoadFilterPayload) => void;
   onApplySalaryFilter: (min: number, max: number, currency: string) => void;
   onClearSalary: () => void;
   onExport: (format: ExportFormat) => void;
@@ -122,7 +122,10 @@ export const PeopleFilters = ({
     filters.status.length > 0 ||
     Boolean(filters.country) ||
     Boolean(filters.role) ||
-    Boolean(filters.search);
+    Boolean(filters.search) ||
+    filters.groupBy !== 'none' ||
+    filters.salaryMin > 0 ||
+    filters.salaryMax > 0;
 
   const handleSave = useCallback(
     (name: string) => saveCurrentFilters(name, filters),
@@ -227,10 +230,12 @@ export const PeopleFilters = ({
             salaryMax: filters.salaryMax > 0 ? filters.salaryMax : undefined,
             salaryCurrency: filters.salaryCurrency || undefined,
           }}
+          hasActiveFilters={hasActiveFilters}
           disabled={isFetching}
           onApply={onLoadFilter}
           onDelete={deleteFilter}
           onSave={handleSave}
+          onReset={onClearAll}
         />
 
         <ExportButton
