@@ -62,7 +62,6 @@ const ContentCard = styled.div`
   background: var(--colors-blank);
   border: 1px solid var(--colors-gray-200);
   border-radius: 12px;
-  overflow: hidden;
 `;
 
 const FiltersSection = styled.div`
