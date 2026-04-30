@@ -32,9 +32,30 @@ const TitleRow = styled.div`
   gap: 16px;
 `;
 
+const TitleLeft = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+`;
+
 const Title = styled.h1`
-  ${({ theme }) => theme.typography.h2}
-  color: var(--colors-darkBlue);
+  font-family: 'Remote Sans', Inter, sans-serif;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: 0;
+  margin: 0;
+  color: var(--colors-gray-900);
+`;
+
+const MemberCount = styled.span`
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0;
+  color: var(--colors-gray-600);
+  white-space: nowrap;
 `;
 
 const ContentCard = styled.div`
@@ -114,8 +135,9 @@ export const PeoplePage = () => {
 
   const queryFilters = { ...filters, search: debouncedSearch };
 
-  // isFetching shared across all controls — same cache key as PeopleTable so no extra request
-  const { isFetching } = usePeopleQuery(queryFilters);
+  // isFetching + total shared across all controls — same cache key as PeopleTable so no extra request
+  const { isFetching, data } = usePeopleQuery(queryFilters);
+  const total = data?.total ?? 0;
 
   const handleRowClick = useCallback((person: Person) => setSelectedPerson(person), []);
 
@@ -142,7 +164,10 @@ export const PeoplePage = () => {
   return (
     <Container>
       <TitleRow>
-        <Title data-testid="page-title">People</Title>
+        <TitleLeft>
+          <Title data-testid="page-title">People</Title>
+          {total > 0 && <MemberCount>{total.toLocaleString()} members</MemberCount>}
+        </TitleLeft>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <Button onClick={() => setIsAddModalOpen(true)}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
