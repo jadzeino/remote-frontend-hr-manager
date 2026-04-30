@@ -1,9 +1,5 @@
 import { css } from 'styled-components';
 
-/**
- * @todo Put this into styled-component's theme, similar to "typography", so
- * we can have strict typing.
- */
 export const themeColor = css`
   --colors-brand: #624de3;
   --colors-darkBlue: #00234b;

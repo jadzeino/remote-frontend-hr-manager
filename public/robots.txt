@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://remote-frontend-hr-manager.vercel.app/sitemap.xml
