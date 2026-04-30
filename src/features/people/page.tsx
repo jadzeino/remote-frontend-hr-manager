@@ -15,7 +15,6 @@ import { COUNTRIES } from './constants';
 import { Person, GroupBy, ViewMode } from './types';
 import { exportAllPeople } from './services/peopleApi';
 import { exportPeople, ExportFormat } from './utils/exportData';
-import { ExportButton } from './components/ExportButton/ExportButton';
 
 const Container = styled.main`
   max-width: var(--layout-width);
@@ -159,11 +158,6 @@ export const PeoplePage = () => {
           <Subtitle>Manage your team members, contracts, and onboarding.</Subtitle>
         </TitleBlock>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <ExportButton
-            onExport={handleExport}
-            isExporting={isExporting}
-            disabled={isFetching}
-          />
           <Button onClick={() => setIsAddModalOpen(true)}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path d="M8 8C9.93 8 11.5 6.43 11.5 4.5S9.93 1 8 1 4.5 2.57 4.5 4.5 6.07 8 8 8Zm0 1.5c-2.67 0-8 1.34-8 4V15h16v-1.5c0-2.66-5.33-4-8-4Z" fill="currentColor"/>
@@ -197,6 +191,8 @@ export const PeoplePage = () => {
             onLoadFilter={handleLoadFilter}
             onApplySalaryFilter={applySalaryFilter}
             onClearSalary={clearSalaryFilter}
+            onExport={handleExport}
+            isExporting={isExporting}
           />
         </FiltersSection>
 

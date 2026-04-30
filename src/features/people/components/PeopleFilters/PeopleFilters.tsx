@@ -6,6 +6,8 @@ import { Dropdown } from '@/ui-kit/dropdown';
 import { SearchInput } from '@/ui-kit/search-input';
 import { useSavedFilters } from '../../hooks/useSavedFilters';
 import { PeopleFiltersState, GroupBy } from '../../types';
+import { ExportButton } from '../ExportButton/ExportButton';
+import { ExportFormat } from '../../utils/exportData';
 import { SavedFiltersMenu } from '../SavedFiltersMenu/SavedFiltersMenu';
 import { SalaryRangeFilter } from '../SalaryRangeFilter/SalaryRangeFilter';
 
@@ -92,6 +94,8 @@ type Props = {
   onLoadFilter: (f: { search?: string; status?: string[]; country?: string; role?: string; groupBy?: GroupBy }) => void;
   onApplySalaryFilter: (min: number, max: number, currency: string) => void;
   onClearSalary: () => void;
+  onExport: (format: ExportFormat) => void;
+  isExporting: boolean;
 };
 
 export const PeopleFilters = ({
@@ -109,6 +113,8 @@ export const PeopleFilters = ({
   onLoadFilter,
   onApplySalaryFilter,
   onClearSalary,
+  onExport,
+  isExporting,
 }: Props) => {
   const { savedFilters, saveCurrentFilters, deleteFilter } = useSavedFilters();
 
@@ -225,6 +231,12 @@ export const PeopleFilters = ({
           onApply={onLoadFilter}
           onDelete={deleteFilter}
           onSave={handleSave}
+        />
+
+        <ExportButton
+          onExport={onExport}
+          isExporting={isExporting}
+          disabled={isFetching}
         />
 
         <Spacer />
