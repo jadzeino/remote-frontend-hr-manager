@@ -126,13 +126,6 @@ export const PersonDrawer = ({ person, onClose }: Props) => {
           </DetailRow>
 
           <DetailRow>
-            <DetailLabel>Status</DetailLabel>
-            <DetailValue>
-              <Badge status={person.status} />
-            </DetailValue>
-          </DetailRow>
-
-          <DetailRow>
             <DetailLabel>Annual salary</DetailLabel>
             <DetailValue>{formatSalary(person.salary, person.currency)}</DetailValue>
           </DetailRow>
