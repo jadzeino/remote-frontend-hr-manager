@@ -2,7 +2,8 @@ import { useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Button } from '@/ui-kit/button';
-import { Text } from '@/ui-kit/text';
+
+import { PageErrorFallback } from '@/shared/ui/PageErrorFallback/PageErrorFallback';
 import { usePeopleFilters } from './hooks/usePeopleFilters';
 import { useDebounce } from './hooks/useDebounce';
 import { usePeopleQuery } from './hooks/usePeopleQuery';
@@ -73,13 +74,6 @@ const FiltersSection = styled.div`
 `;
 
 
-
-const ErrorFallback = ({ resetErrorBoundary }: { resetErrorBoundary: () => void }) => (
-  <div style={{ padding: 48, textAlign: 'center' }}>
-    <Text $variant="bodyM" $color="gray-700">Something went wrong loading the people list.</Text>
-    <Button onClick={resetErrorBoundary} style={{ marginTop: 16 }}>Try again</Button>
-  </div>
-);
 
 type StatusKey = 'active' | 'onboarding' | 'offboarded';
 
@@ -206,7 +200,7 @@ export const PeoplePage = () => {
           />
         </FiltersSection>
 
-        <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <ErrorBoundary FallbackComponent={PageErrorFallback}>
           <TableCard
             filters={queryFilters}
             viewMode={filters.viewMode}
