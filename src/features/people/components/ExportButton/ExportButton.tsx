@@ -14,7 +14,7 @@ const MainBtn = styled.button`
   color: var(--colors-gray-700);
   font-size: ${({ theme }) => theme.typography.size.sm};
   font-family: inherit;
-  font-weight: 500;
+  font-weight: 400;
   cursor: pointer;
   white-space: nowrap;
   transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
