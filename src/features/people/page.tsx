@@ -50,7 +50,22 @@ const Subtitle = styled.p`
   color: var(--colors-gray-500);
 `;
 
-const Toolbar = styled.div`
+const ContentCard = styled.div`
+  background: var(--colors-blank);
+  border: 1px solid var(--colors-gray-200);
+  border-radius: 12px;
+  overflow: hidden;
+`;
+
+const FiltersSection = styled.div`
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 1px solid var(--colors-gray-200);
+`;
+
+const SearchRow = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
@@ -178,50 +193,50 @@ export const PeoplePage = () => {
         isFetching={isFetching}
       />
 
-      {/* Search + status pill toggles */}
-      <Toolbar>
-        <SearchWrapper>
-          <SearchInput
-            placeholder="Search people..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onClear={() => setSearchInput('')}
-            disabled={isFetching}
-            aria-label="Search people"
-            data-testid="search-input"
+      <ContentCard>
+        <FiltersSection>
+          <SearchRow>
+            <SearchWrapper>
+              <SearchInput
+                placeholder="Search people..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onClear={() => setSearchInput('')}
+                disabled={isFetching}
+                aria-label="Search people"
+                data-testid="search-input"
+              />
+            </SearchWrapper>
+          </SearchRow>
+
+          <PeopleFilters
+            filters={filters}
+            countries={COUNTRIES}
+            isFetching={isFetching}
+            onToggleStatus={toggleStatus}
+            onSetCountry={setCountry}
+            onSetRole={setRole}
+            onSetGroupBy={(g: GroupBy) => setGroupBy(g)}
+            onClearAll={handleClearAll}
+            onLoadFilter={handleLoadFilter}
+            onApplySalaryFilter={applySalaryFilter}
+            onClearSalary={clearSalaryFilter}
           />
-        </SearchWrapper>
+        </FiltersSection>
 
-      </Toolbar>
-
-      {/* Country / type / group-by / saved filters — compact single row */}
-      <PeopleFilters
-        filters={filters}
-        countries={COUNTRIES}
-        isFetching={isFetching}
-        onToggleStatus={toggleStatus}
-        onSetCountry={setCountry}
-        onSetRole={setRole}
-        onSetGroupBy={(g: GroupBy) => setGroupBy(g)}
-        onClearAll={handleClearAll}
-        onLoadFilter={handleLoadFilter}
-        onApplySalaryFilter={applySalaryFilter}
-        onClearSalary={clearSalaryFilter}
-      />
-
-      {/* Fixed-height table card with integrated footer */}
-      <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <TableCard
-          filters={queryFilters}
-          viewMode={filters.viewMode}
-          isFetching={isFetching}
-          onRowClick={handleRowClick}
-          onSort={handleSort}
-          onPageChange={setPage}
-          onLimitChange={setLimit}
-          onViewModeChange={(m: ViewMode) => setViewMode(m)}
-        />
-      </ErrorBoundary>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <TableCard
+            filters={queryFilters}
+            viewMode={filters.viewMode}
+            isFetching={isFetching}
+            onRowClick={handleRowClick}
+            onSort={handleSort}
+            onPageChange={setPage}
+            onLimitChange={setLimit}
+            onViewModeChange={(m: ViewMode) => setViewMode(m)}
+          />
+        </ErrorBoundary>
+      </ContentCard>
 
       <PersonDrawer person={selectedPerson} onClose={() => setSelectedPerson(null)} />
       <AddMemberModal

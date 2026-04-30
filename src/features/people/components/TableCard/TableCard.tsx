@@ -11,9 +11,6 @@ import ChevronsRight from '@/theme/icons/chevrons-right.svg?react';
 const Card = styled.div`
   display: flex;
   flex-direction: column;
-  background: var(--colors-blank);
-  border: 1px solid var(--colors-gray-200);
-  border-radius: 12px;
   overflow: hidden;
   height: 600px;
 `;
