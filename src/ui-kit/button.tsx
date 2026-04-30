@@ -33,12 +33,12 @@ const StyledButton = styled.button<{ $variant?: 'primary' | 'secondary' }>`
           background: var(--colors-brand);
           color: var(--colors-blank);
           &:hover:not(:disabled) {
-            background: #4f3bc0;
+            background: var(--colors-brand-hover);
           }
         `}
 
   &:focus-visible {
-    outline: 3px solid rgba(98, 77, 227, 0.35);
+    outline: 3px solid var(--colors-brand-focus);
     outline-offset: 2px;
   }
 

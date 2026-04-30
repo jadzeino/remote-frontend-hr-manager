@@ -23,6 +23,13 @@ export const themeColor = css`
 
   --colors-blank: #ffffff;
 
+  /* Semantic tokens */
+  --colors-success: #12B76A;
+  --colors-success-bg: #ECFDF3;
+  --colors-brand-hover: #4f3bc0;
+  --colors-brand-subtle: #f5f3ff;
+  --colors-brand-focus: rgba(98, 77, 227, 0.35);
+
   /* Named aliases used as var() fallbacks in components */
   --Grey-900: #0F1419;
   --Grey-600: #4B5865;
@@ -57,5 +64,12 @@ export const darkThemeColor = css`
     --Grey-400: #3D5060;
     --Green-Light-700: #7EC93A;
     --Green-Light-500: #AEED6A;
+
+    /* Semantic tokens — dark */
+    --colors-success: #7EC93A;
+    --colors-success-bg: #1a2f14;
+    --colors-brand-hover: #6B58F0;
+    --colors-brand-subtle: #1e1a3a;
+    --colors-brand-focus: rgba(139, 120, 240, 0.4);
   }
 `;

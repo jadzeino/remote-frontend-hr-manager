@@ -74,20 +74,19 @@ const Container = styled.div`
   position: relative;
 
   &:hover ${StyledInput} {
-    border-color: #7F5AF8;
-    background-color: #F5F3FF;
+    border-color: var(--colors-brand);
+    background-color: var(--colors-brand-subtle);
   }
 
   &:focus-within ${StyledInput} {
-    border-color: #7F5AF8;
+    border-color: var(--colors-brand);
     background-color: var(--colors-blank);
-    /* 2px white gap then 2px Purple-700 outer ring */
-    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #6638EF;
+    box-shadow: 0 0 0 2px var(--colors-blank), 0 0 0 4px var(--colors-brand-focus);
   }
 
   &:hover ${SearchIconWrapper},
   &:focus-within ${SearchIconWrapper} {
-    color: #7F5AF8;
+    color: var(--colors-brand);
   }
 `;
 

@@ -48,22 +48,22 @@ const Container = styled.div`
   align-items: center;
 
   &:hover ${StyledSelect}:not(:disabled) {
-    border-color: #7f5af8;
-    background-color: #f5f3ff;
+    border-color: var(--colors-brand);
+    background-color: var(--colors-brand-subtle);
   }
 
   &:hover:not(:has(${StyledSelect}:disabled)) ${ChevronWrapper} {
-    color: #7f5af8;
+    color: var(--colors-brand);
   }
 
   &:focus-within ${StyledSelect}:not(:disabled) {
-    border-color: #7f5af8;
+    border-color: var(--colors-brand);
     background-color: var(--colors-blank);
-    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #6638ef;
+    box-shadow: 0 0 0 2px var(--colors-blank), 0 0 0 4px var(--colors-brand-focus);
   }
 
   &:focus-within:not(:has(${StyledSelect}:disabled)) ${ChevronWrapper} {
-    color: #7f5af8;
+    color: var(--colors-brand);
   }
 `;
 

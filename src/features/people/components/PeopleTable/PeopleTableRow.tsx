@@ -15,10 +15,10 @@ const NameCell = styled.div`
 const NameText = styled.span`
   font-family: Inter, sans-serif;
   font-weight: 500;
-  font-size: 14px;
+  font-size: ${({ theme }) => theme.typography.size.sm};
   line-height: 22px;
   letter-spacing: 0;
-  color: var(--Grey-900, #0f1419);
+  color: var(--Grey-900);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

@@ -116,8 +116,8 @@ const SuccessToast = styled.div`
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: #12b76a;
-  color: white;
+  background: var(--colors-success);
+  color: var(--colors-blank);
   padding: 12px 20px;
   border-radius: 8px;
   font-size: 1.4rem;

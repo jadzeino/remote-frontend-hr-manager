@@ -7,7 +7,7 @@ const Chip = styled.button`
   padding: 4px 10px;
   border: 1px solid var(--colors-brand);
   border-radius: 16px;
-  background-color: #f0eeff;
+  background-color: var(--colors-brand-subtle);
   color: var(--colors-brand);
   font-size: 1.2rem;
   font-weight: 500;

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { DisclosureButton } from '@/ui-kit/disclosure-button';
+import { DisclosurePanel } from '@/ui-kit/disclosure-panel';
 import { useSalaryBounds } from '../../hooks/useSalaryBounds';
 
 const CURRENCIES = ['All', 'USD', 'EUR', 'GBP'] as const;
@@ -19,37 +21,8 @@ const Wrapper = styled.div`
   display: inline-flex;
 `;
 
-const TriggerBtn = styled.button<{ $active: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 34px;
+const TriggerBtn = styled(DisclosureButton)`
   padding: 0 12px;
-  border: 1px solid ${({ $active }) => ($active ? 'var(--colors-brand)' : 'var(--colors-gray-500, #697786)')};
-  border-radius: 9999px;
-  background: ${({ $active }) => ($active ? '#f0eeff' : 'var(--colors-blank)')};
-  color: ${({ $active }) => ($active ? 'var(--colors-brand)' : 'var(--colors-gray-700)')};
-  font-size: 1.3rem;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
-
-  &:hover:not(:disabled) {
-    border-color: #7f5af8;
-    background-color: #f5f3ff;
-    color: #7f5af8;
-  }
-
-  &:focus-visible {
-    outline: none;
-    border-color: #7f5af8;
-    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #6638ef;
-  }
-
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
 `;
 
 const ActiveDot = styled.span`
@@ -60,21 +33,10 @@ const ActiveDot = styled.span`
   flex-shrink: 0;
 `;
 
-const Panel = styled.div<{ $open: boolean }>`
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
+const Panel = styled(DisclosurePanel)`
   width: 300px;
-  background: var(--colors-blank);
-  border: 1px solid var(--colors-gray-200);
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  z-index: 200;
   padding: 16px;
-  pointer-events: ${({ $open }) => ($open ? 'auto' : 'none')};
-  opacity: ${({ $open }) => ($open ? 1 : 0)};
-  transform: ${({ $open }) => ($open ? 'translateY(0)' : 'translateY(-6px)')};
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 200;
 `;
 
 const PanelHeader = styled.div`
@@ -85,7 +47,7 @@ const PanelHeader = styled.div`
 `;
 
 const PanelTitle = styled.span`
-  font-size: 1.4rem;
+  font-size: ${({ theme }) => theme.typography.size.sm};
   font-weight: 600;
   color: var(--colors-darkBlue);
 `;
@@ -118,7 +80,7 @@ const CurrencySelect = styled.select`
 const ResetBtn = styled.button`
   border: none;
   background: none;
-  font-size: 1.3rem;
+  font-size: ${({ theme }) => theme.typography.size.smXS};
   color: var(--colors-gray-500);
   cursor: pointer;
   padding: 0;
@@ -204,8 +166,8 @@ const ValBox = styled.div`
   height: 32px;
   padding: 0 10px;
   border: 1px solid var(--colors-gray-300);
-  border-radius: 6px;
-  font-size: 1.3rem;
+  border-radius: var(--radius-sm);
+  font-size: ${({ theme }) => theme.typography.size.smXS};
   font-weight: 600;
   color: var(--colors-darkBlue);
   background: var(--colors-gray-50, #fafafa);
@@ -214,7 +176,7 @@ const ValBox = styled.div`
 `;
 
 const ToLabel = styled.span`
-  font-size: 1.3rem;
+  font-size: ${({ theme }) => theme.typography.size.smXS};
   color: var(--colors-gray-400);
 `;
 
@@ -241,15 +203,15 @@ const ApplyBtn = styled.button`
   width: 100%;
   height: 36px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--colors-brand);
   color: var(--colors-blank);
-  font-size: 1.3rem;
+  font-size: ${({ theme }) => theme.typography.size.smXS};
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--transition-fast);
 
-  &:hover { background: #4f3bc0; }
+  &:hover { background: var(--colors-brand-hover); }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 `;
 
@@ -342,7 +304,7 @@ export const SalaryRangeFilter = ({
     <Wrapper ref={wrapperRef}>
       <TriggerBtn
         type="button"
-        $active={isActive}
+        active={isActive}
         disabled={disabled}
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
@@ -353,7 +315,7 @@ export const SalaryRangeFilter = ({
           : `$ Salary`}
       </TriggerBtn>
 
-      <Panel $open={open} role="dialog" aria-label="Salary range filter">
+      <Panel open={open} role="dialog" aria-label="Salary range filter">
         <PanelHeader>
           <PanelTitle>Salary range</PanelTitle>
           <HeaderRight>

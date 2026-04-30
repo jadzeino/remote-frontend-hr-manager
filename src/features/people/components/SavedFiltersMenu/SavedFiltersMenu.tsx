@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import styled from 'styled-components';
+import { DisclosureButton } from '@/ui-kit/disclosure-button';
+import { DisclosurePanel } from '@/ui-kit/disclosure-panel';
 import { SavedFilter } from '../../types';
 
 const MAX_FILTERS = 5;
@@ -10,37 +12,8 @@ const Wrapper = styled.div`
   display: inline-flex;
 `;
 
-const TriggerBtn = styled.button<{ $hasItems: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 34px;
+const TriggerBtn = styled(DisclosureButton)`
   padding: 0 12px;
-  border: 1px solid ${({ $hasItems }) => ($hasItems ? 'var(--colors-brand)' : 'var(--colors-gray-500, #697786)')};
-  border-radius: 9999px;
-  background: ${({ $hasItems }) => ($hasItems ? '#f0eeff' : 'var(--colors-blank)')};
-  color: ${({ $hasItems }) => ($hasItems ? 'var(--colors-brand)' : 'var(--colors-gray-700)')};
-  font-size: 1.3rem;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
-
-  &:hover:not(:disabled) {
-    border-color: #7f5af8;
-    background-color: #f5f3ff;
-    color: #7f5af8;
-  }
-
-  &:focus-visible {
-    outline: none;
-    border-color: #7f5af8;
-    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #6638ef;
-  }
-
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
 `;
 
 const Badge = styled.span`
@@ -57,26 +30,15 @@ const Badge = styled.span`
   font-weight: 700;
 `;
 
-const Panel = styled.div<{ $open: boolean }>`
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
+const Panel = styled(DisclosurePanel)`
   width: 280px;
-  background: var(--colors-blank);
-  border: 1px solid var(--colors-gray-200);
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   z-index: 200;
-  pointer-events: ${({ $open }) => ($open ? 'auto' : 'none')};
-  opacity: ${({ $open }) => ($open ? 1 : 0)};
-  transform: ${({ $open }) => ($open ? 'translateY(0)' : 'translateY(-6px)')};
-  transition: opacity 0.15s ease, transform 0.15s ease;
   overflow: hidden;
 `;
 
 const PanelHeader = styled.div`
   padding: 12px 14px 8px;
-  font-size: 1.2rem;
+  font-size: ${({ theme }) => theme.typography.size.xs};
   font-weight: 600;
   color: var(--colors-darkBlue);
   border-bottom: 1px solid var(--colors-gray-100);
@@ -105,7 +67,7 @@ const FilterItem = styled.li`
 
 const FilterName = styled.span`
   flex: 1;
-  font-size: 1.3rem;
+  font-size: ${({ theme }) => theme.typography.size.smXS};
   color: var(--colors-gray-700);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -135,7 +97,7 @@ const DeleteBtn = styled.button`
 
 const EmptyState = styled.p`
   padding: 16px 14px;
-  font-size: 1.3rem;
+  font-size: ${({ theme }) => theme.typography.size.smXS};
   color: var(--colors-gray-400);
   text-align: center;
 `;
@@ -152,7 +114,7 @@ const SaveSection = styled.div`
 
 const LimitMessage = styled.p`
   padding: 10px 14px;
-  font-size: 1.2rem;
+  font-size: ${({ theme }) => theme.typography.size.xs};
   color: var(--colors-gray-500);
   text-align: center;
   line-height: 1.5;
@@ -172,8 +134,8 @@ const NameInput = styled.input<{ $error?: boolean }>`
   height: 32px;
   padding: 0 8px;
   border: 1px solid ${({ $error }) => ($error ? '#dc2626' : 'var(--colors-gray-300)')};
-  border-radius: 6px;
-  font-size: 1.3rem;
+  border-radius: var(--radius-sm);
+  font-size: ${({ theme }) => theme.typography.size.smXS};
   color: var(--colors-gray-700);
   background: var(--colors-blank);
   transition: border-color 0.15s ease;
@@ -199,17 +161,17 @@ const SaveBtn = styled.button`
   height: 32px;
   padding: 0 12px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--colors-brand);
   color: var(--colors-blank);
-  font-size: 1.2rem;
+  font-size: ${({ theme }) => theme.typography.size.xs};
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s ease;
+  transition: background var(--transition-fast);
 
   &:hover:not(:disabled) {
-    background: #4f3bc0;
+    background: var(--colors-brand-hover);
   }
 
   &:disabled {
@@ -288,7 +250,7 @@ export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApp
     <Wrapper ref={wrapperRef}>
       <TriggerBtn
         type="button"
-        $hasItems={savedFilters.length > 0}
+        active={savedFilters.length > 0}
         disabled={disabled}
         aria-expanded={open}
         aria-haspopup="true"
@@ -301,7 +263,7 @@ export const SavedFiltersMenu = ({ savedFilters, currentFilters, disabled, onApp
         </svg>
       </TriggerBtn>
 
-      <Panel $open={open} role="dialog" aria-label="Saved filters">
+      <Panel open={open} role="dialog" aria-label="Saved filters">
         <PanelHeader>Saved filters</PanelHeader>
 
         {savedFilters.length === 0 ? (

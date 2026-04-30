@@ -31,8 +31,8 @@ const Tick = styled.span`
   }
 
   ${Input}:checked + & {
-    background-color: #7F5AF8;
-    border-color: #7F5AF8;
+    background-color: var(--colors-brand);
+    border-color: var(--colors-brand);
 
     svg {
       display: block;
@@ -59,9 +59,9 @@ const Container = styled.label`
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
   &:hover {
-    border-color: #7F5AF8;
-    background-color: #F5F3FF;
-    --checkbox-tick-color: #7F5AF8;
+    border-color: var(--colors-brand);
+    background-color: var(--colors-brand-subtle);
+    --checkbox-tick-color: var(--colors-brand);
   }
 
   &:has(${Input}:checked) {
@@ -69,10 +69,10 @@ const Container = styled.label`
   }
 
   &:focus-within {
-    border-color: #7F5AF8;
-    --checkbox-tick-color: #7F5AF8;
+    border-color: var(--colors-brand);
+    --checkbox-tick-color: var(--colors-brand);
     outline: none;
-    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #6638EF;
+    box-shadow: 0 0 0 2px var(--colors-blank), 0 0 0 4px var(--colors-brand-focus);
   }
 
   &:has(${Input}:disabled) {

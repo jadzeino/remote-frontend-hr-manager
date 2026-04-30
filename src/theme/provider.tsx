@@ -6,6 +6,7 @@ import {
 } from 'styled-components';
 import { normalize } from 'styled-normalize';
 import { themeColor, darkThemeColor } from './color';
+import { themeTokens } from './tokens';
 import './fonts/styles.css';
 import { themeTypography } from './typography';
 
@@ -18,6 +19,7 @@ const GlobalStyle = createGlobalStyle`
   
   :root {
     ${themeColor}
+    ${themeTokens}
 
     --font-primary: "Inter", sans-serif;
     --layout-width: 1100px;

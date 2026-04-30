@@ -3,9 +3,9 @@ import styled from 'styled-components';
 type Status = 'active' | 'onboarding' | 'offboarded';
 
 const STATUS_COLORS: Record<Status, { dotDark: string; dotLight: string; bg: string; text: string }> = {
-  active:     { dotDark: 'var(--Green-Light-700, #58A30D)', dotLight: 'var(--Green-Light-500, #8DE13A)', bg: '#ECFDF3', text: '#027A48' },
-  onboarding: { dotDark: '#6941C6', dotLight: '#D9D6FE', bg: '#F0EEFF', text: '#5B4FD4' },
-  offboarded: { dotDark: 'var(--Grey-600, #4B5865)', dotLight: 'var(--Grey-400, #9AA6B2)', bg: '#F2F4F7', text: '#667085' },
+  active:     { dotDark: 'var(--Green-Light-700)', dotLight: 'var(--Green-Light-500)', bg: 'var(--colors-success-bg)', text: 'var(--colors-success)' },
+  onboarding: { dotDark: '#6941C6', dotLight: '#D9D6FE', bg: 'var(--colors-brand-subtle)', text: 'var(--colors-brand)' },
+  offboarded: { dotDark: 'var(--Grey-600)', dotLight: 'var(--Grey-400)', bg: '#F2F4F7', text: '#667085' },
 };
 
 const Dot = styled.span<{ $dark: string; $light: string }>`
@@ -20,7 +20,7 @@ const Wrapper = styled.span`
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 1.2rem;
+  font-size: ${({ theme }) => theme.typography.size.xs};
   font-weight: 500;
   line-height: 1.8;
   white-space: nowrap;

@@ -19,6 +19,7 @@ export const themeTypographySize = {
   lg: '1.6rem',
   md: '1.6rem',
   sm: '1.4rem',
+  smXS: '1.3rem',
   xs: '1.2rem',
 };
 
@@ -37,6 +38,7 @@ export const themeTypography = {
 
   bodySM: getTextStyles(400, '14px', 1.29),
   bodySMB: getTextStyles(600, '14px', 1.29),
+  bodySMXS: getTextStyles(400, '13px', 1.23),
 
   bodyXS: getTextStyles(400, '12px', 1.23),
 };

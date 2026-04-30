@@ -140,15 +140,15 @@ const CARDS = [
     key: null as null,
     icon: '👥',
     label: 'Total members',
-    accent: '#624de3',
-    bg: '#f0eeff',
+    accent: 'var(--colors-brand)',
+    bg: 'var(--colors-brand-subtle)',
   },
   {
     key: 'active' as StatStatus,
     icon: '✓',
     label: 'Active',
-    accent: '#16a34a',
-    bg: '#dcfce7',
+    accent: 'var(--colors-success)',
+    bg: 'var(--colors-success-bg)',
   },
   {
     key: 'onboarding' as StatStatus,
@@ -161,8 +161,8 @@ const CARDS = [
     key: 'offboarded' as StatStatus,
     icon: '○',
     label: 'Offboarded',
-    accent: '#9ca3af',
-    bg: '#f3f4f6',
+    accent: 'var(--colors-gray-400)',
+    bg: 'var(--colors-gray-100)',
   },
 ] as const;
 

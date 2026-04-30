@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { DisclosurePanel } from '@/ui-kit/disclosure-panel';
 import { ExportFormat } from '../../utils/exportData';
 
 const MainBtn = styled.button`
@@ -7,7 +8,7 @@ const MainBtn = styled.button`
   align-items: center;
   height: 34px;
   padding: 0 14px;
-  border: 1px solid var(--colors-gray-500, #697786);
+  border: 1px solid var(--colors-gray-500);
   border-right: none;
   border-radius: 9999px 0 0 9999px;
   background: var(--colors-blank);
@@ -17,7 +18,7 @@ const MainBtn = styled.button`
   font-weight: 400;
   cursor: pointer;
   white-space: nowrap;
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
 
   &:disabled {
     opacity: 0.45;
@@ -26,8 +27,8 @@ const MainBtn = styled.button`
 
   &:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #6638ef;
-    border-color: #7f5af8;
+    box-shadow: 0 0 0 2px var(--colors-blank), 0 0 0 4px var(--colors-brand-focus);
+    border-color: var(--colors-brand);
     z-index: 1;
   }
 `;
@@ -38,12 +39,12 @@ const ChevronBtn = styled.button`
   justify-content: center;
   width: 30px;
   height: 34px;
-  border: 1px solid var(--colors-gray-500, #697786);
+  border: 1px solid var(--colors-gray-500);
   border-radius: 0 9999px 9999px 0;
   background: var(--colors-blank);
   color: var(--colors-gray-500);
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
 
   &:disabled {
     opacity: 0.45;
@@ -52,8 +53,8 @@ const ChevronBtn = styled.button`
 
   &:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #6638ef;
-    border-color: #7f5af8;
+    box-shadow: 0 0 0 2px var(--colors-blank), 0 0 0 4px var(--colors-brand-focus);
+    border-color: var(--colors-brand);
     z-index: 1;
   }
 
@@ -70,29 +71,17 @@ const Wrapper = styled.div`
 
   &:hover ${MainBtn}:not(:disabled),
   &:hover ${ChevronBtn}:not(:disabled) {
-    border-color: #7f5af8;
-    background-color: #f5f3ff;
-    color: #7f5af8;
+    border-color: var(--colors-brand);
+    background-color: var(--colors-brand-subtle);
+    color: var(--colors-brand);
   }
 `;
 
-const Dropdown = styled.ul<{ $open: boolean }>`
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
+const Dropdown = styled(DisclosurePanel)`
   min-width: 140px;
   margin: 0;
   padding: 4px 0;
   list-style: none;
-  background: var(--colors-blank);
-  border: 1px solid var(--colors-gray-200);
-  border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-  pointer-events: ${({ $open }) => ($open ? 'auto' : 'none')};
-  opacity: ${({ $open }) => ($open ? 1 : 0)};
-  transform: ${({ $open }) => ($open ? 'translateY(0)' : 'translateY(-6px)')};
-  transition: opacity 0.15s ease, transform 0.15s ease;
 `;
 
 const DropdownItem = styled.li<{ $active: boolean }>`
@@ -100,7 +89,7 @@ const DropdownItem = styled.li<{ $active: boolean }>`
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  font-size: 1.3rem;
+  font-size: ${({ theme }) => theme.typography.size.smXS};
   font-weight: ${({ $active }) => ($active ? 600 : 400)};
   color: ${({ $active }) => ($active ? 'var(--colors-brand)' : 'var(--colors-gray-700)')};
   cursor: pointer;
@@ -111,7 +100,7 @@ const DropdownItem = styled.li<{ $active: boolean }>`
   }
 `;
 
-const Badge = styled.span`
+const BadgeLabel = styled.span`
   margin-left: auto;
   font-size: 1rem;
   color: var(--colors-gray-400);
@@ -171,7 +160,7 @@ export const ExportButton = ({ onExport, isExporting, disabled }: Props) => {
         </svg>
       </ChevronBtn>
 
-      <Dropdown $open={open} role="menu">
+      <Dropdown as="ul" open={open} align="right" role="menu">
         {FORMATS.map((f) => (
           <DropdownItem
             key={f.value}
@@ -181,7 +170,7 @@ export const ExportButton = ({ onExport, isExporting, disabled }: Props) => {
             onClick={() => { setFormat(f.value); setOpen(false); }}
           >
             {f.label}
-            <Badge>{f.badge}</Badge>
+            <BadgeLabel>{f.badge}</BadgeLabel>
           </DropdownItem>
         ))}
       </Dropdown>
