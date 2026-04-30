@@ -27,25 +27,14 @@ const Container = styled.main`
 
 const TitleRow = styled.div`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
-`;
-
-const TitleBlock = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 `;
 
 const Title = styled.h1`
   ${({ theme }) => theme.typography.h2}
   color: var(--colors-darkBlue);
-`;
-
-const Subtitle = styled.p`
-  font-size: 1.3rem;
-  color: var(--colors-gray-500);
 `;
 
 const ContentCard = styled.div`
@@ -153,10 +142,7 @@ export const PeoplePage = () => {
   return (
     <Container>
       <TitleRow>
-        <TitleBlock>
-          <Title data-testid="page-title">People</Title>
-          <Subtitle>Manage your team members, contracts, and onboarding.</Subtitle>
-        </TitleBlock>
+        <Title data-testid="page-title">People</Title>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <Button onClick={() => setIsAddModalOpen(true)}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
