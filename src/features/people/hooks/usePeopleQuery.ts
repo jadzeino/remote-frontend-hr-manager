@@ -2,7 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { fetchPeople } from '../services/peopleApi';
 import { PeopleFiltersState, PeopleQuery, PeopleResponse } from '../types';
 
-function filtersToQuery(filters: PeopleFiltersState): PeopleQuery {
+export function filtersToQuery(filters: PeopleFiltersState): PeopleQuery {
   return {
     page: filters.page,
     limit: filters.limit,

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Table, TableCell, TableRow, TableThCell } from '@/ui-kit/table';
 import { Text } from '@/ui-kit/text';
 import { Button } from '@/ui-kit/button';
 import styled from 'styled-components';
-import { usePeopleQuery } from '../../hooks/usePeopleQuery';
+import { usePeopleQuery, peopleQueryKey, filtersToQuery } from '../../hooks/usePeopleQuery';
+import { fetchPeople } from '../../services/peopleApi';
 import { useGroupedPeople } from '../../hooks/useGroupedPeople';
 import { PeopleSkeletonRows } from '../PeopleSkeleton/PeopleSkeleton';
 import { PeopleTableRow } from './PeopleTableRow';
@@ -79,6 +81,7 @@ type Props = {
 };
 
 export const PeopleTable = ({ filters, onRowClick, onSort, onDataReady }: Props) => {
+  const queryClient = useQueryClient();
   const { data, isLoading, isError, refetch, isFetching } = usePeopleQuery(filters);
 
   const people = data?.data ?? [];
@@ -93,6 +96,17 @@ export const PeopleTable = ({ filters, onRowClick, onSort, onDataReady }: Props)
   useEffect(() => {
     if (data) onDataReady?.(data.total, data.totalPages);
   }, [data, onDataReady]);
+
+  // Prefetch the next page in the background as soon as the current page lands
+  useEffect(() => {
+    if (!data || filters.page >= data.totalPages) return;
+    const nextQuery = filtersToQuery({ ...filters, page: filters.page + 1 });
+    queryClient.prefetchQuery({
+      queryKey: peopleQueryKey(nextQuery),
+      queryFn: () => fetchPeople(nextQuery),
+      staleTime: 30_000,
+    });
+  }, [data, filters, queryClient]);
 
   const toggleGroup = (key: string) => {
     setCollapsed((prev) => {
