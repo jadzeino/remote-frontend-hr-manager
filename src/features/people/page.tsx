@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Button } from '@/ui-kit/button';
-import { SearchInput } from '@/ui-kit/search-input';
 import { Text } from '@/ui-kit/text';
 import { usePeopleFilters } from './hooks/usePeopleFilters';
 import { useDebounce } from './hooks/useDebounce';
@@ -65,18 +64,6 @@ const FiltersSection = styled.div`
   border-bottom: 1px solid var(--colors-gray-200);
 `;
 
-const SearchRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-`;
-
-const SearchWrapper = styled.div`
-  flex: 1;
-  min-width: 220px;
-  max-width: 340px;
-`;
 
 
 const ErrorFallback = ({ resetErrorBoundary }: { resetErrorBoundary: () => void }) => (
@@ -195,24 +182,13 @@ export const PeoplePage = () => {
 
       <ContentCard>
         <FiltersSection>
-          <SearchRow>
-            <SearchWrapper>
-              <SearchInput
-                placeholder="Search people..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onClear={() => setSearchInput('')}
-                disabled={isFetching}
-                aria-label="Search people"
-                data-testid="search-input"
-              />
-            </SearchWrapper>
-          </SearchRow>
-
           <PeopleFilters
             filters={filters}
             countries={COUNTRIES}
             isFetching={isFetching}
+            searchValue={searchInput}
+            onSearchChange={(v) => setSearchInput(v)}
+            onSearchClear={() => setSearchInput('')}
             onToggleStatus={toggleStatus}
             onSetCountry={setCountry}
             onSetRole={setRole}

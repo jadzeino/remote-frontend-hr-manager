@@ -51,16 +51,11 @@ export const TableThCell = styled.th<CellProps>`
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--Grey-600, #4B5865);
-  background-color: var(--Grey-100, #EEF2F6);
+  background-color: var(--colors-gray-100);
   text-align: ${(props) => props.$textAlign ?? 'left'};
-
-  &:first-child {
-    border-top-left-radius: 10px;
-  }
 
   &:last-child {
     padding-right: 20px;
-    border-top-right-radius: 10px;
   }
 `;
 
@@ -80,12 +75,4 @@ export const TableCell = styled.td<CellProps>`
     border-top: 0;
   }
 
-  ${TableRow}:last-child & {
-    &:first-child {
-      border-bottom-left-radius: 10px;
-    }
-    &:last-child {
-      border-bottom-right-radius: 10px;
-    }
-  }
 `;

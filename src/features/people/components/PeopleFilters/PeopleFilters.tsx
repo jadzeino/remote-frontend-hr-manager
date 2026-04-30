@@ -3,17 +3,28 @@ import styled from 'styled-components';
 import { FilterChip } from '@/shared/ui/FilterChip/FilterChip';
 import { Checkbox } from '@/ui-kit/checkbox';
 import { Dropdown } from '@/ui-kit/dropdown';
+import { SearchInput } from '@/ui-kit/search-input';
 import { useSavedFilters } from '../../hooks/useSavedFilters';
 import { PeopleFiltersState, GroupBy } from '../../types';
 import { SavedFiltersMenu } from '../SavedFiltersMenu/SavedFiltersMenu';
 import { SalaryRangeFilter } from '../SalaryRangeFilter/SalaryRangeFilter';
 
-// Single compact row: [Country] [Type] | Group:[select] | [saved chips] [+Save] [Clear all]
-const ControlsBar = styled.div`
+// Row 1: [Search] [Country] [Type] [Salary]
+// Row 2: [Onboarding] [Active] [Offboarded] | Group: [select] | [Saved] [Clear]
+const FilterRow = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+`;
+
+const SearchWrapper = styled.div`
+  flex: 1;
+  min-width: 180px;
+`;
+
+const Spacer = styled.div`
+  flex: 1;
 `;
 
 const ControlsDivider = styled.span`
@@ -30,7 +41,6 @@ const ChipsRow = styled.div`
   gap: 6px;
   flex-wrap: wrap;
 `;
-
 
 const InlineLabel = styled.span`
   font-size: 1.3rem;
@@ -59,7 +69,6 @@ const ClearButton = styled.button`
   }
 `;
 
-
 const GROUP_OPTIONS: { value: GroupBy; label: string }[] = [
   { value: 'none',     label: 'No grouping' },
   { value: 'country',  label: 'Country' },
@@ -72,6 +81,9 @@ type Props = {
   filters: PeopleFiltersState;
   countries: string[];
   isFetching?: boolean;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  onSearchClear: () => void;
   onToggleStatus: (status: string) => void;
   onSetCountry: (country: string) => void;
   onSetRole: (role: string) => void;
@@ -86,6 +98,9 @@ export const PeopleFilters = ({
   filters,
   countries,
   isFetching = false,
+  searchValue,
+  onSearchChange,
+  onSearchClear,
   onToggleStatus,
   onSetCountry,
   onSetRole,
@@ -110,8 +125,20 @@ export const PeopleFilters = ({
 
   return (
     <>
-      {/* Single compact controls row */}
-      <ControlsBar>
+      {/* Row 1: search + data filters */}
+      <FilterRow>
+        <SearchWrapper>
+          <SearchInput
+            placeholder="Search people..."
+            value={searchValue}
+            onChange={(e) => onSearchChange(e.target.value)}
+            onClear={onSearchClear}
+            disabled={isFetching}
+            aria-label="Search people"
+            data-testid="search-input"
+          />
+        </SearchWrapper>
+
         <Dropdown
           value={filters.country}
           onChange={(e) => onSetCountry(e.target.value)}
@@ -120,9 +147,7 @@ export const PeopleFilters = ({
         >
           <option value="">All countries</option>
           {countries.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
+            <option key={c} value={c}>{c}</option>
           ))}
         </Dropdown>
 
@@ -137,8 +162,18 @@ export const PeopleFilters = ({
           <option value="contractor">Contractor</option>
         </Dropdown>
 
-        <ControlsDivider />
+        <SalaryRangeFilter
+          salaryMin={filters.salaryMin}
+          salaryMax={filters.salaryMax}
+          salaryCurrency={filters.salaryCurrency}
+          disabled={isFetching}
+          onApplySalaryFilter={onApplySalaryFilter}
+          onClearSalary={onClearSalary}
+        />
+      </FilterRow>
 
+      {/* Row 2: status + grouping + saved */}
+      <FilterRow>
         <Checkbox
           label="Onboarding"
           checked={filters.status.includes('onboarding')}
@@ -160,17 +195,6 @@ export const PeopleFilters = ({
 
         <ControlsDivider />
 
-        <SalaryRangeFilter
-          salaryMin={filters.salaryMin}
-          salaryMax={filters.salaryMax}
-          salaryCurrency={filters.salaryCurrency}
-          disabled={isFetching}
-          onApplySalaryFilter={onApplySalaryFilter}
-          onClearSalary={onClearSalary}
-        />
-
-        <ControlsDivider />
-
         <InlineLabel>Group:</InlineLabel>
         <Dropdown
           value={filters.groupBy}
@@ -179,13 +203,12 @@ export const PeopleFilters = ({
           disabled={isFetching}
         >
           {GROUP_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
+            <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </Dropdown>
 
         <ControlsDivider />
+
         <SavedFiltersMenu
           savedFilters={savedFilters}
           currentFilters={{
@@ -204,14 +227,16 @@ export const PeopleFilters = ({
           onSave={handleSave}
         />
 
+        <Spacer />
+
         {hasActiveFilters && (
           <ClearButton type="button" onClick={onClearAll} disabled={isFetching}>
             Clear all
           </ClearButton>
         )}
-      </ControlsBar>
+      </FilterRow>
 
-      {/* Active filter chips — only when filters are applied */}
+      {/* Active filter chips */}
       {hasActiveFilters && (
         <ChipsRow>
           {filters.country && (
