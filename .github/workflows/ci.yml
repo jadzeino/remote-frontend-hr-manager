@@ -82,9 +82,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        # --ignore-scripts skips the json-server data-generation postinstall;
-        # it is only needed for local development
-        run: npm ci --ignore-scripts
+        run: npm ci
 
       - name: Build
         run: npm run build
