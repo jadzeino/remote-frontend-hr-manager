@@ -1,6 +1,8 @@
 import { Person, PeopleQuery, PeopleResponse } from '../types';
 
-const BASE_URL = 'http://localhost:4002';
+// In development Vite proxies /api → http://localhost:4002 (see vite.config.ts).
+// In production the /api/people serverless function handles requests.
+const BASE_URL = '/api';
 
 /**
  * Builds a URLSearchParams object from a PeopleQuery.

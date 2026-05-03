@@ -6,6 +6,12 @@ import svgr from 'vite-plugin-svgr';
 export default defineConfig({
   plugins: [svgr(), react()],
   resolve: { alias: { '@': '/src' } },
+  server: {
+    proxy: {
+      // In dev, /api/* is proxied to json-server so the frontend can always call /api
+      '/api': { target: 'http://localhost:4002', rewrite: (p) => p.replace(/^\/api/, '') },
+    },
+  },
   // https://vitest.dev/config/
   test: {
     environment: 'jsdom',
