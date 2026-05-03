@@ -10,6 +10,7 @@
   "scripts": {
     "server:setup": "node generate-members.js",
     "postinstall": "npm run server:setup",
+    "build": "vite build",
     "dev-client": "vite",
     "dev-server": "json-server --watch --port 4002 --delay 1500 server.json",
     "dev": "conc \"npm:dev-*\"",
